@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set 
+	xmlns:a="http://schemas.android.com/apk/res/android" 
+	a:id="@+id/wave_scale"
+	a:interpolator="@android:anim/accelerate_interpolator">
+    <alpha
+        a:fromAlpha="0.0"
+        a:toAlpha="1.0"
+        a:duration="400" />
+    <scale
+        a:fromXScale="0.5" a:toXScale="1.5"
+        a:fromYScale="0.5" a:toYScale="1.5"
+        a:pivotX="50%" a:pivotY="50%"
+        a:duration="200" />
+    <scale 
+        a:fromXScale="1.5" a:toXScale="1"
+        a:fromYScale="1.5" a:toYScale="1"
+        a:pivotX="50%" a:pivotY="50%"
+        a:startOffset="200"
+        a:duration="200" />
+</set>

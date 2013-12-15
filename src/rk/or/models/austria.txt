@@ -1,0 +1,57 @@
+d -200 200 -200 -200  200 -200  200 200
+c 0 2 od -1 igb
+t 2000 f 4 180 0) mo 2 0
+c 1 2 od -1 seg 9
+t 1000 f 9 170 1) t 1000 f 9 0 1)
+c 1 6 seg 12
+t 1000 f 14 170 1) t 1000 f 14 0 1)
+seg 9 c 1 9 seg 19
+t 1000 f 19 170 1) t 1000 f 19 0 1)
+seg 12  p 19 11 
+t 1000 f 22 -170 0 4 7 10 1 12 9 6 2)
+t 1000 f 22 0 0 4 7 10 1 12 9 6 2)
+seg 19
+// deplie
+t 2000 r 6 -180  0 13 4 14 7 17 10)
+// le coin
+b 7 9 om 0 od 1
+t 1000 f 32 -180 10 1 12)
+mo 18 12 mo 17 10 mo 8 1
+// les bords
+od -1
+t 1000 f 27 180 7 4 0)
+t 1000 f 25 180 2 6 9)
+mo 8 1 7 9
+// Replie le bas
+od -1
+t 2000 f 6 180 16 2 15 6 18 12)
+flat
+// marque 
+p 6 5 od -1
+t 2000 f 41 -170 15 14 4 6 1 7 8 9 10 12 18 17 11) 
+t 2000 f 41 0 15 14 4 6 1 7 8 9 10 12 18 17 11) 
+// ouvre 15 tire le 18 mais Pb alors triche on tourne autour de 21
+ob 6 7
+b 8 15 11 b 8 14 10
+t 2000 f 41 -135 15 6 f 21 115 8 17 7 10 11 1 a 18 stp 18 12 stp 8 9 1)
+// faces passées en positif, remises sous l'axe 
+od -1 4 21 10 6 12 14
+t 2000 f 21 180 8 17 7 10 11 1 a 18 stp 18 12 stp 8 9 1)
+// sort le bec
+t 2000 f 17 -120 1) a 1
+// referme
+od -1 11 19 5 17 20 13 15 7
+t 2000 f 41 0 15 6 12 18 a 1)
+flat
+iao t 1000 zf) igb
+// replie les ailes
+lol 23 29
+od -1
+t 2000 f 53 170 2 16 21 22 31) 
+od 1
+t 2000 f 50 170 0 13 19 20 30)
+t 100 m 0 0 -10 12 m 0 0 10 12 a 1)
+// Montre
+iao t 1000 zf)
+ia t 1000 tz -90) io t 1000 tz 90)
+iso t 4000 ty 360) igb

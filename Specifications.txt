@@ -1,0 +1,352 @@
+Specifications
+1/ Définir le modèle, les plis (By, Cross, Perpendicular)
+2/ Plier (Rotate, Fold, Adjust, Move)
+3/ Visualiser (3D turn, zoom)
+4/ Enregistrer lire (.txt .opx .dxf .svg .obj)
+5/ IHM Android GLES (animer, rejouer, enregistrer)
+6/ Pliages courants (cocotte, bateau, lys)
+
+1/ Définition du modèle et des plis
+1.1/ D: Définit un modèle par 4 points CCW 
+ Define model : D -200,200, -200,-200, 200,-200, 200,200
+ Clear Model puis ajoute les 4 points XY : P1 P2 P3 P4, 
+ 4 segments P1P2 P2P3 P3P4 P4P1 type Edge, 1 face P1P2P3P4
+
+1.2/ B: By Définit un pli passant par 2 points : b p1 p2
+ - Définit un plan passant par les 2 points P1 P2 et par l'oeil
+ - Cherche toutes les faces qui coupent ce plan
+ - Découpe toutes les faces par le plan
+ - Découpe 1 face en ajoutant un segment et éventuellement des points
+   NB S'il y a ajout de points alors on ajoute ces points aux faces adjacentes
+   NB Pour charcher les faces qui coupent un plan faut que le plan ait une certaine épaisseur 10 pixel.
+1.3/ C: Cross Définit un pli entre 2 points : c p1 p2
+ - Définit un plan entre les 2 points
+ - Cherche toutes les faces qui coupent ce plan
+ - Découpe toutes les faces par le plan
+1.4/ P: Perpendicular Définit un pli perpendiculaire au segment et passant par le point p s1 p1
+ - Définit un plan perpendiculaire au segment et passant par le point
+ - Cherche toutes les faces qui coupent ce plan
+ - Découpe toutes les faces par le plan
+1.5/ LOL: Line on line L 1 2 On donne 2 segments lol s1 s2
+ - Calcule le segment s3 reliant les points les plus proches des segments 1 et 2
+ - Définit un plan entre les 2 points P1 P2 du segment s3
+   Si les segments se coupent en P1 ie on a P1=P2 ou lg(P1P2)<=10, alors calcule  
+   P4 = P1+P2P3/lg(P2P3)*lg(P1P2) symetrique de P2 sur P1P3
+   et prend le plan entree P2 P4
+ - Découpe toutes les faces par le plan
+1.6/ S: Split : s n d
+ Découpe un segment à n/d en partant du premier point.
+ s 1 2 découpe à la moitié  
+1.7/ SC: Split crossing sc s1 s2
+ Découpe les segments qui se chevauchent une fois tournés.
+ Les segments ne peuvent pas se chevaucher dans le crease pattern, mais en 3D ça peut se produire.
+ Calcule le segment s3 reliant les points les plus proches des segments s1 et s2,
+ Ce segment s3 est perpendiculaire aux 2 segments, son premier point est sur s1, son deuxième sur s2.
+ Si ce segment s3 est assez court, on découpe s1 et s2 avec les points de s3.
+
+2/ Plier
+2.1/ R: Rotate tourne par rapport à un axe (segment) un angle les points  
+ R Rotate Seg Angle Points... 
+  => Convention :  0 aligné, +180 plie vers l'avant, -180 plie vers l'arrière
+2.2/ A: Adjust 
+ Ajuste les coordonnées d'un point en 3D pour que les longueurs des segments
+ partant du point soient égales aux longueurs en 2D.
+ Algo de Kaczmarz : projette sur chaque droite (sphere en 3d) sequentiellement. 
+2.3/ M: Move déplace un point de dx, dy dz : M p0 dx dy dz
+2.4/ Mo: Move ON déplace tous les points sur un seul point: Mo P0 autres...
+2.5/ F: Fold plie les points à gauche d'un segment: F Sg Angle Pt
+ pour qu'ils soient à un angle Angle des points à droite.
+ => Convention :  0 aligné, +180 plie vers l'avant, -180 plie vers l'arrière
+ Si le premier point n'est pas à gauche, on inverse le segment: P1P2 devient P2P1 
+ et le point se retrouve à gauche. 
+2.6/ Flat: déplace tous les points sur z=0
+ A n'utiliser que si on est bloqué, car les longueurs des segments ne sont plus respectées en 3D.
+2.7/ Mol Mop  Stl Stp
+ Move On Line : mol s1 p1 p2... déplace les points p1, p2... sur le segment s1
+ Move On Point : mo p0 p1 p2... déplace les points p1, p2... sur le point p0
+ Stl : Stuck On Line : stl s1 p1 p2... idem mais sans animation, les point sont collés sur le segment.
+ Stp : Stuck On Point: stp p0 p1 p2... déplace les points sur p0
+ A n'utiliser que si on est bloqué dans les animations. 
+
+3/ Visualiser
+3.1/ Tx Ty Tz: Turn X Y Z Angle
+3.2/ T: Time duration (command) refait n fois la commande interpolée pendant duration
+  Commands décode T et lit le reste dans cde jusqu'à ')' 
+  
+  Passe la cde à Commands.animStart(float duration, String cde)
+  qui appelle View3D.animate() 
+  qui fixe View3D.animated=true 
+   et appelle View3D.repaint() ou View3D.refresh()
+  Ensuite c'est lors du prochain View3D.paint()
+   si View3D.animated=true
+    alors View3D appelle Commands.anim()
+  Commands.anim() calcule le temps interpolé tni et le temps de la précédent tpi
+  et appelle Commands.command(cde)
+  Là avec le temps précédent tpi le temps présent tni
+  on calcule le plus à rajouter (tni-tpi) et on execute ce petit plus.
+  Cela finit lorsque tni >= 1 
+   Commands.anim() renvoie false à View3D.paint()
+     qui fixe View3D.animated=false
+       et View3D.paint() n'appellera plus commands.anim()
+  
+  Pour passer à la commande suivante
+   on appelle CommandLoop() lorsque cela finit
+    si CommandLoop() a lancé une animation Commands.anim() renvoie true
+       
+  Pour une pause 
+   Commands.anim() renvoie false => ne sera plus appelé par View3D
+  
+  Pour continuer lorsqu'on est en pause
+   On appelle View3D.animate() qui fixe View3D.animated=true  
+    View3D.paint() appellera Commands.anim() 
+   
+3.2.1/ Pa : pause 
+3.2.2/ Co : continue
+
+3.3/ I: Interpolation : il ib ia io iao it  ito ig
+  - linear il
+  - bounce ib 
+  - anticipate ia
+  - overshoot io
+  - anticipate and overshoot iao
+  - accelerate decelerate iad
+  - spring overshoot ito
+  - spring bounce itb
+  - gravity bounce igb
+  
+3.4/ Z: zoom
+3.4.1/ 
+ z scale x y
+  zoom et déplace
+ zf zoom fit
+  get3DBounds() donne Centre => déplace tous les points pour que Centre = 0,0,0
+  get3DBounds() donne max X,Y,Z => Max => scale tous les points pour que Max = 200,200
+  OUI le 200x200 est en dur...
+  
+3.5/ O: offset face [faces]
+ Fixe un dz aux points des faces, le dz ne sera utilisé que lors l'affichage, multiplié par la normale.
+ Il est positif si la face à une normale orientée vers l'oeil, 
+ +1 rapproche la face de l'oeil.
+ Comme la face est décalée suivant sa normale, et que celle ci dépend
+ de l'orientation CCW ou CW on multiplie par (f.normal[2]>=0?1:-1)
+ L'offset est multiplié par kOffset = 0.1 pour ne pas être visible (ou être très visible si k = 100) 
+3.5.1/ Od: od v [faces]  Offset Decale
+ Décale les offsets de toutes les faces, ou juste celles listées si elle sont listées
+ le max soit val vers l'arrière si val<0, 
+ le min soit val vers l'avant si val>0 
+ Permet de plier par devant avec -1 et par derrière avec +1 sans problème.
+ TODO : Espacer régulièrement, actuellement -1,-1 plie, od, donne -3 -1 devrait donner -2 -1 ?
+ TODO : Os OffsetShow: om 100 t 1000 ) om .01
+3.5.2/ Oa: val [faces] 
+ Ajoute un offset"val" à toutes les faces, ou juste les faces listées si elles sont listées.
+3.5.3/ Om: k [faces]
+ Multiplie par k les offsets de toutes les faces, ou juste celles listées si elles sont listées.
+3.5.4/ Ob: [faces]
+ Prend la moyenne des offsets des faces listées
+ Enlève la moyenne de tous les offsets. Ce qui revient à centrer le modèle entre les faces listées.
+ Divise par 2 les offset des faces, Ce qui revient à les rapprocher, pour passer entre les autres.
+ Pour un fold between ou un squash fold, il faut inverser les offset des 2 faces lors du passage à 90.
+ Pour 4 faces avec 4 offets 1 -1 1 -1 on obtient 0.5 -0.5 1 -1
+ Pour 4 faces avec 4 offets 2 1 2 1 on obtient 0.25 -0.25 0.5 -0.5
+ En pliant par devant -2 -1 -2 -1 devient 2 1 -2 -1
+ En pliant par derrière 2 1 2 1 devient -2 -1 2 1
+ En pliant entre 1 -1 1 -1 avec ob on a 0.5 -0.5 1 -1,
+  en pliant les 2 faces se retrouvent inversées : -0.5 0.5 1 -1
+  en multipliant par -1 au passage à 90° on a ce qu'on cherche : 0.5 -0.5 1 -1 
+ 
+3.6/ Visu : Labels avec une liste gérée dans la View3D
+  Slots permet d'éviter que les labels se chevauchent.
+3.6.1/  Emulation  dans swing.MouseHandler
+  Lorsque CTRL est appuyé e.getModifiersEx() == InputEvent.CTRL_DOWN_MASK
+  Le premier point reste fixe, c'est celui de premier clic
+  Les clics suivants sont associés au deuxième pointeur.
+  public boolean onTouchEvent(MotionEvent event)
+  1 touch => pause
+  1 tap   => continue
+  1 drag  => rotate X Y
+  2 touch => zoom, rotate Z
+  2 touch tap => undo
+
+3.7/ Visu : Symboles Arrow
+3.8/ Algos : trouver le moyen de calculer sa superposition des faces : Offset
+3.9/ Librairies : visualiser avec JOGL GLES SoftGL
+
+4/ Enregistrer lire
+4.1/ Export In Out
+4.1.1/ Read: In file.txt
+4.1.2/ Write: Write file.svg file.txt
+
+5/ Icones (same name : ic_launcher_orisim.png)
+ldpi (120 dpi)  (Low density screen)        Launcher Icon Size 36 x 36 px
+mdpi (160 dpi)  (Medium density screen)     Launcher Icon Size 48 x 48 px
+hdpi (240 dpi)  (High density screen)       Launcher Icon Size 72 x 72 px
+xhdpi (320 dpi) (Extra-high density screen) Launcher Icon Size 96 x 96 px 
+---------------------
+Mathematiques des mouvements
+
+tn va de 0 à 1 
+tn est calculé à l'instant t par rapport au début en divisant par la durée 
+float tn = (t-tstart-pauseDuration)/(float)duration; // tn from 0 to 1
+
+tni (interpolé) va de 0 à 1  
+tni peut passer par -0.5 (anticipation) 
+   et par +1.5 (dépassement) 
+   tni vaut 1.0 à la fin à tn = 1
+tpi (précédent) est la valeur à l'instant précédant
+
+Pour Move 
+move(p, dx,dy,dz) du model ne fait que +dx,+dy,+dz
+à t on veut Xn = D*tni
+la valeur précédente vaut Xp = D*tpi
+pour avoir Xn on doit ajouter Xp-Xn = D * (tpi-tni)
+
+Pour r, f, tx, ty, tz même chose, la valeur à atteindre ne change pas
+on ajoute la valeur * (tpi-tni)
+
+Pour Zoom
+moveModel déplace tous les points de dx,dy,dz :
+ p.x += dx; p.y += dy; p.z += dz;
+scaleModel mutiplie les coordonnées de tous les points :
+ p.x *= scale; p.y *= scale; p.z *= scale;
+
+De la forme A * (X + B) // on déplace puis on zoome
+à t on veut Xn = An*X + A*Bn // attention A*Bn pas An*Bn
+Par exemple A=.5 B=200 X=-200 se retrouve à -100 + 100 = 0
+Pour tn=0 on veut An=1 et pour tn=1 on veut An=A
+ An = 1+tn*(A-1) // à 0 on a 1, à 1 on a A 
+Pour tn=0 on veut A*Bn=0 et pour tn=1 on veut A*Bn=A*B
+ Bn = tn*A*B // à 0 on a 0 à 1 on a A*B
+on met sous la forme A*(X+B) 
+ à t on veut Xn = (1+tn*(A-1)) * (X + (tn*A*B / (1+tn*(A-1)))
+Pour le voulu à t en fonction du précédent tp
+ on avait    Xp = (1+tp*(A-1)) * (X + (tp*A*B / (1+tp*(A-1))))
+Comme on a paumé X la valeur initiale, au fil des delta 
+Le voulu Xn doit s'exprimer en fonction du précédent Xp
+ Xp / (1+tp*(A-1)) = X + tp*A*B / (1+tp*(A-1))
+ X = Xp / (1+tp*(A-1)) - tp*A*B / (1+tp*(A-1))
+Ok on a X = (Xp - tp*A*B) / (1+tp*(A-1))
+ Xn = (1+tn*(A-1)) * (X + (tn*A*B / (1+tn*(A-1)))
+En remplaçant X
+ Xn = (1+tn*(A-1)) * ((Xp - tp*A*B) / (1+tp*(A-1)) + (tn*A*B / (1+tn*(A-1))) 
+ Xn = ((1+tn*(A-1)/(1+tp*(A-1)) * (Xp - tp*A*B + (tn*A*B)*(1+tp*(A-1)/(1+tn*(A-1)))
+En posant An=(1+tn*(A-1)/(1+tp*(A-1)
+ Xn = An*(Xp - tp*A*B + (tn*A*B)*ascale)
+D'ou 
+ An = (1+tn*(A-1)/(1+tp*(A-1)
+ Bn = B* A*(tn/An-tpi)
+Ce qui s'écrit en 2 lignes :
+ float ascale = (float)((1+tni*(scale-1))/(1+tpi*(scale-1)));
+ float bfactor = (float)(scale*(tni/ascale -tpi));
+après y a qu'a bouger 
+ model.moveModel(x*bfactor, y*bfactor);
+ model.scaleModel(ascale);
+
+Pour Move On 
+moveOn déplace tous les points B vers le point cible A :
+ pb.x = pa.x*k1 + pb.x*k2;
+Pour tn=0 on veut p=pb et pour tn=1 on veut p=pa
+ Bn = B + (A-B)*tn 
+ Bn = A*tn + B*(1-tn) // si on part de 0
+Comme on paume le point B après un déplacement
+ on calcule un déplacement par rapport au point précédent
+ Bp = A*tp + B*(1-tp) // si on part de 0
+Donc B = (Bp -A*tp) / (1-tp)
+ Bn = A*tn + B*(1-tn)
+ Bn = A*tn + ((Bp -A*tp) / (1-tp)) * (1-tn)
+ Bn = A*(tn - tp*(1-tn)/(1-tp)) + Bp*(1-tn)/(1-tp) 
+Ce qui s'écrit en 2 lignes :
+ float k2 = (float)((1-tni)/(1-tpi));
+ float k1 = (float)(tni - tpi*k2);
+après y a qu'a bouger 
+ model.moveOn(pA, k1, k2, list);
+
+---------------------
+Mathematiques des animations
+
+deff('[y]=inter(t)',[
+'if t < 1/3 then'
+'  y=9*t*t'
+'else if t < 7/9 then'
+'  y=9*(t-1/3)*(t-1/3)-4*(t-1/3)+1'
+'else if t < 9/9 then'
+'  y=9*(t-7/9)*(t-7/9)-2*(t-7/9)+1'
+'else y=1'
+'end'
+'end'
+'end'],'t');
+t=[0:0.001:1];
+delete("all")                 
+plot(t, inter)
+plot(t,1)
+// Une chute libre y=A*t²+V*t+x0
+// à 1/3 on a y = 1 la derivée 18*t vaut 6, on prend 6 *2/3 =4 pour v
+//   y(t):=9*(t-1/3)*(t-1/3)-4*(t-1/3)+1; kill(t);
+// p:9*(t-1/3)*(t-1/3)-4*(t-1/3)+1; ou rat(p) =(27*t^2-30*t+10)/3
+//   q(t):=diff(rat(p)); => (54*t-30)/3
+// solve(p-1,t); t=1/3, t=7/9; => on a y =1 en 7/9
+//   ev(p,t=2/3); => 1 ev(q,t=2/3); 
+// à 7/9 on a y =1 la derivée 18*t-10 vaut 4, on prend 4 pour v
+//   y(t):=9*(t-7/9)*(t-7/9)-4*(t-7/9)+1;
+// p:9*(t-7/9)*(t-7/9)-4*(t-7/9)+1;solve(p-1,t);
+// [t=7/9,t=11/9] on dépasse 1
+// pour arriver à 1 inconnue b en t =1
+// q:9*(t-7/9)*(t-7/9)-b*(t-7/9)+1;
+// solve(ev(q,t=1)-1,b); => b = 2
+
+// Equations simplifiées 0 1/3 7/9
+// => 9*t^2
+// rat(9*(t-1/3)*(t-1/3)-4*(t-1/3)+1); => 9*t^2-10*t+10/3
+// rat(9*(t-7/9)*(t-7/9)-2*(t-7/9)+1); => 9*t^2-16*t+8
+
+// Equations simplifiées 0 1/2 
+// =>4*t^2
+// rat(4*(t-1/2)*(t-1/2)-2*(t-1/2)+1);   => 4*t^2-6*t+3
+// rat(4*(t-7/6)*(t-7/6)+2/3*(t-7/6)+1); => (12*t^2-26*t+17)/3
+
+// Equations simplifiées 0 0.5393
+// y=9*t*t-3*t
+// y=9*t^2-13.8537*t+5.8537
+---------------------
+Mathematiques des découpes
+
+Pour découper une face par un plan, on cherche tous les segments qui coupent le plan.
+S'il y en a 2 on coupe la face en 2.
+
+Pour identifier les segments qui coupent un plan, 2 méthodes.
+
+La méthode simple marche mal : chercher les intersections puis s'il y en a 2 couper.
+ Sur des faces tournées on n'a pas toujours exactement de les mêmes valeurs. 
+ Les erreurs d'arrondis font que les retours ne sont pas toujours les mêmes.
+ lol ne renvoie pas les mêmes découpes selon le run.
+ 
+La méthode robuste consiste à prendre un plan avec une épaisseur.
+ Les points sont d'abord situés par rapport au plan -1 0 1 (derrière, sur, devant)
+ Les segments sont examinés en partant de N-1 (n-1,0) (0,1) (1,2) ...
+ 9 cas à examiner sur 2 points (derrière, sur, devant) x (derrière, sur, devant)
+
+- Plane.intersect(Point a, Point b) {
+  (A+tAB).N=d <=> t=(d-A.N)/(AB.N) then Q=A+tAB 0<t<1
+  On calcule t et si t compris entre 0 et 1 on renvoie le point Q
+- Plane.classifyPointToPlane(Vector3D i)
+  (A+tAB).N = d <=> d>e devant, d<e derrière, sinon sur le plan
+- Model.splitFaceByPlane(Face f, Plane pl)
+  9 cas pour le segment qui va de A vers B et coupe le plan en I (inter)
+   fr (front) est le polygone devant ba (back) est le polygone derrière.
+   ces polygones ne doivent pas se superposer.
+     A  B I fr ba  case
+ 1) -1 -1 .  .  b  c5
+ 2) -1  0 b  b  b  c6c7
+ 3) -1  1 i  ib i  c1c2 => i (c1)
+ 4)  0 -1 a  a  ab c4c5 => a (c4)
+ 5)  0  0 ab .  b  c6
+ 6)  0  1 a  b  .  c2   => a (c2b)
+ 7)  1 -1 i  ib ib c3c5 => i (c3)
+ 8)  1  0 b  b  b  c6
+ 9)  1  1 .  b  .  c2
+ 
+ Il y a 4 cas avec une intersection : 3,7,4,6
+ Il y a 5 cas à tester, au moins
+ Test cases 5 : 1-3-9-7-1(2i), 
+ 1-2-5-4-1(1i) , 9-8-5-6-9(1i), 
+ 1-2-6-9-7-1(2i),9-3-1-2-6-9(2i)
+       

@@ -1,0 +1,71 @@
+d -200 200 -200 -200 200 -200 200 200 
+// Diagonale
+b 0 2 od -1 igb 
+t 1000 f 4 180 3) mo 1 3
+// Marque coin bas droit
+c 1 2 od -1 seg 7
+t 2000 f 7 180 2) t 1000 f 7 0 2) seg 7
+// Marque  
+c 2 4 seg 11
+t 2000 f 11 180 2) t 1000 f 11 0 2)
+// Marque 
+lol 6 11 seg 14 15
+t 2000 f 14 180 2) t 1000 f 14 0 2) 
+seg 11
+
+// Deplie tout PB f 4 0 3 5) ouvre dans le mauvais sens
+t 2000 r 4 -180 3 6)
+flat om 0 od -1
+// Oreille de lapin
+b 5 8 3 b 6 8 2  seg 17 19
+t 1000 f 14 90 10 a 2)
+t 1000 f 15 90 9 a 2)
+t 1000 f 15 180 9 a 2)
+t 1000 f 14 180 10 a 2)
+seg 14 15 17 19
+
+// Replie le corps
+od 1
+t 2000 f 4 -180 3 6 9 a 2) 
+flat a 2
+// Line on Line
+lol 4 7 0 1 seg 21 7
+od -1 
+// Marque le corps
+t 2000 f 21 179 0) t 1000 f 21 0 0)
+// Ouvre
+ob 0 1 seg 21 7
+t 2000 f 7 120 1 11 a 0)
+// Recentre
+iao t 500 zf) il
+// Replie le corps
+od -1 
+om -1 0 1
+// Aplatit
+t 1000 f 23 -180 0) 
+// Referme
+t 1000 f 4  180 11 1)
+t 500 tz 110)
+
+// Soit intersection de 2 segments sc 0 8 soit ramène le bas sur le bec
+lol 3 6 
+seg 3 20 6  31 33
+flat od -1
+// Ouvre les ailes
+t 1000 f 31 160 11 1)
+od 1
+t 1000 f 33 160 12 3)
+// Recentre
+iao t 500 zf) igb
+seg 3 33 20 31 6
+
+// Ouvre le corps  
+t 200 r 4 -10 1 11 14 17 5)
+t 200 r 4 10 3 12 16 18 6)
+// Ouvre le bec
+t 200 r 14 -10 10  r 15 -10 9 a 2)
+// Ouvre un peu le corps 2 degres
+t 500 r 5 -4 5 r 5 4 6)
+// Montre
+iao t 1000 zf) 
+iso t 4000 ty 360) igb

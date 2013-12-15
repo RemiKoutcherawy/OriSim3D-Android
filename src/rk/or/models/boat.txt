@@ -1,0 +1,87 @@
+d -200 366 -200 -200 200 -200 200 366
+io t 2000 zf)
+// plie le haut sur le bas
+c 0 1 od -1 igb
+t 2000 f 6 180 0 3)
+iao t 1000 zf) igb 
+// plie les bords à 45 
+c 0 3 
+seg 9
+lol 6 11 lol 8 11
+mo 2 3 mo 1 0 mo 8 6 mo 12 11 mo 10 9
+od -1 
+t 1000 f 17 -180 5)
+t 1000 f 15 180 4)
+seg 9
+b 10 12
+mo 14 5 4 13
+// replie le bas
+od -1 t 1000 f 21 -180 0 6 3)
+// replie les cotés de devant
+b 11 7 b 9 7
+t 1000 ty 180)
+od -1 
+t 1000 f 29 -180 0) t 1000 f 27 -180 3)
+stl 13 16 stl 17 15
+o 0 6 13 
+// replie les cotés de l'arrière
+od -1 
+t 1000 f 23 -180 1 8 2)
+b 7 10 5 b 7 12 7
+t 1000 ty 180)
+od -1 t 1000 f 31 -180 1) t 1000 f 33 -180 2) 
+stl 15 17 stl 19 18 
+od -5 14 7 od -6 4 12
+// OK
+t 1000 zf) il
+// Ouvre partie délicate
+flat
+ob 9 8
+t 2000 r 13 90 13 6 5 4  1 a 11 15  stp 11 12 stl 24 2 stl 25 3 stp 15 18 a 3 2 18)
+stl 17 15
+t 2000 r 13 90 13 6 5 4  1 a 11 15  stp 11 12 stl 24 2 stl 25 3 stp 15 18 a 3 2 18 stl 17 15)
+t 1000 zf tz 45 a 2 3)
+iao t 1000 zf) igb 
+// Flatten
+flat
+mo 17 15 16 18 mo 10 9 11 12 mo 0 3 mo 1 2
+// marque le pli horizontal
+t 1000 zf)
+p 17 17 
+// plie le devant
+od -1
+t 2000 f 57 180 12 11 3 2)
+// plie l'arrière
+t 500 ty 180)
+od -1
+t 2000 f 47 180 10 9 0 1) 
+// Recentre
+iao t 1000 zf) iad
+// offset entre les faces 
+ob 23 25
+// Unfold 
+t 500 ty 180)
+// Pb twist squares we add segments 
+b 13 23 24 b 13 19 22 b 14 21 23 b 14 25 25 
+// Tourne la pointe 11 12, et le bas 23 25 18 15 
+// le 25 collé au 18 15 23 tire le a26 collé au 24 et 29
+// le 29 tire le a13 collé au 4 5 
+// le 13 tire le a27 collé au 22 20
+// le 6 reste sur s20 le 2 sur S18 le 1 sur S38
+t 2000 r 11 -90 3 11 12  25 23 18 15 30 a 26 stp 26 24 29 a 13 stp 13 4 5 a 27 stp 27 22 20 stl 20 6 stl 18 2 stl 38 1 a 6 2 1)
+stl 19 11 12 stl 13 9 10 a 20 22 24 26 5
+t 2000 r 11 -90 3 11 12  25 23 18 15 30 a 26 stp 26 24 29 a 13 stp 13 4 5 a 27 stp 27 22 20 stl 20 6 stl 18 2 stl 38 1 a 6 2 1)
+stl 19 11 12 stl 13 9 10 
+// Met à plat
+t 1000 mo 28 20 22 27 mo 30 24 26 29 mo 14 4 5 13 mo 0 1 mo 3 2 mo 8 6)
+t 1000 tz -45)
+isb t 1000 zf) il
+// Replie les bords Ne coupe pas poupe et proue
+b 15 16 16 17 23 29 28 18 19 25 
+om 0.1 6 11 15 5 9 13  26 36 37 38 20 32 33 35 22 24  27 39 21 34 30 31
+t 2000 r 71 90 20 22 27 13 4 5 24 26 29 r 66 90 28 14 30 a 10 12 stp 10 9 stp 12 11 stl 12 1 stl 18 2 a 1 2 stl 48 0 stl 25 3 a 0 3) 
+t 2000 r 71 50 20 22 27 13 4 5 24 26 29 r 66 30 28 14 30 a 10 12 stp 10 9 stp 12 11 stl 12 1 stl 18 2 a 1 2 stl 48 0 stl 25 3 a 0 3)
+ // Montre
+iao t 1000 zf) t 1000 zf)
+iso t 4000 ty 360) igb
+
