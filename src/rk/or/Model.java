@@ -398,7 +398,6 @@ public class Model implements Serializable {
         p.y = (p.y+(pp.y-p.y))*k1 + p.y*k2;
         p.z = (p.z+(pp.z-p.z))*k1 + p.z*k2;
     	}
-    	return;
     }	  
   }
   /** Move given or all points to z = 0 */

@@ -3,7 +3,7 @@
 	package="rk.or.android" 
 	a:versionCode="4" 
 	a:versionName="OriSim3D-1.4">
-	<uses-sdk a:minSdkVersion="7" a:targetSdkVersion="18"></uses-sdk>
+	<uses-sdk a:minSdkVersion="7" a:targetSdkVersion="22"/>
 	<supports-screens a:anyDensity="true" a:normalScreens="true" a:smallScreens="true" a:largeScreens="true" a:resizeable="true"></supports-screens>
     <uses-feature a:glEsVersion="0x00020000" a:required="true" />
     <application a:allowBackup="true"
