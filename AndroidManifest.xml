@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:a="http://schemas.android.com/apk/res/android" 
 	package="rk.or.android" 
-	a:versionCode="4" 
-	a:versionName="OriSim3D-1.4">
+	a:versionCode="5" 
+	a:versionName="OriSim3D-1.5">
 	<uses-sdk a:minSdkVersion="7" a:targetSdkVersion="22"/>
 	<supports-screens a:anyDensity="true" a:normalScreens="true" a:smallScreens="true" a:largeScreens="true" a:resizeable="true"></supports-screens>
     <uses-feature a:glEsVersion="0x00020000" a:required="true" />
