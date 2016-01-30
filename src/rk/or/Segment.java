@@ -15,26 +15,31 @@ public class Segment implements Comparable<Segment>, Serializable {
   public float lg2d, lg3d, angle;
   public static final int PLAIN=0, EDGE=1, MOUNTAIN=2, VALLEY=3, TEMPORARY=-1;
 
-  /** Constructs a segment with 2 points */
-  public Segment(Point p1, Point p2, int type, int id) {
+  /** Construct a segment */
+  public Segment() {}
+  
+  /** Set from 2 points */
+  public Segment setFrom2PointsTypeId(Point p1, Point p2, int type, int id) {
     this.p1 = p1;
     this.p2 = p2;
     this.type = type;
     this.lg2d =  (float) Math.sqrt((p1.xf-p2.xf)*(p1.xf-p2.xf)+ (p1.yf-p2.yf)*(p1.yf-p2.yf));
     this.id = id;
+		return this;
   }
-  /** Construct a new segment with two new points (use only in Vector computations) */
-  public Segment(Vector3D a, Vector3D b){
-  	this.p1 = new Point(a, -1);
-  	this.p2 = new Point(b, -1);
+  /** Set segment with two new points (use only in Vector computations) */
+  public Segment setFrom2Points(Point a, Point b){
+  	this.p1 = new Point().setFromPointId(a, -1);
+  	this.p2 = new Point().setFromPointId(b, -1);
   	this.type =TEMPORARY;
   	this.id = -1;
+		return this;
   }
 	/** Compares this segment with o other segment */
   public int compareTo(Segment o) {
     return (int) compareTo(o.p1, o.p2);
   }
-  /** We Override to select segment from existing segments */
+  /** Override to select segment from existing segments */
   public boolean equals(Point a, Point b) {
 	  return p1.id == a.id && p2.id == b.id;
   }
@@ -78,9 +83,9 @@ public class Segment implements Comparable<Segment>, Serializable {
   	// (v1.v2)*t1 - (v2.v2)*t2 = -v2.r <=> b*t1 -e*t2 = -f
   	// Solved to t1=(bf-ce)/(ae-bb) t2=(af-bc)/(ae-bb)
   	float t1, t2;
-  	Vector3D v1 = new Vector3D(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z); // this direction
-  	Vector3D v2 = new Vector3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z); // s direction
-  	Vector3D r = new Vector3D(p1.x-s.p1.x, p1.y-s.p1.y, p1.z-s.p1.z); // s.p1 to this.p1
+  	Point v1 = new Point().setFrom3D(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z); // this direction
+  	Point v2 = new Point().setFrom3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z); // s direction
+  	Point r = new Point().setFrom3D(p1.x-s.p1.x, p1.y-s.p1.y, p1.z-s.p1.z); // s.p1 to this.p1
   	float a  = v1.dot(v1); // squared length of this
   	float e  = v2.dot(v2); // squared length of s
   	float f  = v2.dot(r);  // 
@@ -88,7 +93,7 @@ public class Segment implements Comparable<Segment>, Serializable {
   	if (a <= EPSILON && e <= EPSILON){
   		// Both degenerate into points
   		t1 = t2 = 0.0f;
-  		return new Segment(p1, s.p1,Segment.TEMPORARY, -1);
+  		return new Segment().setFrom2PointsTypeId(p1, s.p1,Segment.TEMPORARY, -1);
   	}
   	if (a <= EPSILON){
   		// This segment degenerate into point
@@ -128,9 +133,9 @@ public class Segment implements Comparable<Segment>, Serializable {
 				}
   		}
   	}
-  	Vector3D c1 = p1.add(v1.scaleThis(t1)); // c1 = p1+t1*(p2-p1) 
-  	Vector3D c2 = s.p1.add(v2.scaleThis(t2)); // c2 = p1+t2*(p2-p1)
-		return new Segment(c1, c2);
+  	Point c1 = p1.add(v1.scaleThis(t1)); // c1 = p1+t1*(p2-p1) 
+  	Point c2 = s.p1.add(v2.scaleThis(t2)); // c2 = p1+t2*(p2-p1)
+		return new Segment().setFrom2Points(c1, c2);
   }
   /** Closest points from this(line) to s(line) returned as a new segment */
   public Segment closestLine(Segment s){
@@ -142,9 +147,9 @@ public class Segment implements Comparable<Segment>, Serializable {
   	// (v1.v2)*t1 - (v2.v2)*t2 = -v2.r <=> b*t1 -e*t2 = -f
   	// Solved to t1=(bf-ce)/(ae-bb) t2=(af-bc)/(ae-bb)
   	float t1, t2;
-  	Vector3D v1 = new Vector3D(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z); // this direction
-  	Vector3D v2 = new Vector3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z); // s direction
-  	Vector3D r = new Vector3D(p1.x-s.p1.x, p1.y-s.p1.y, p1.z-s.p1.z); // s.p1 to this.p1
+  	Point v1 = new Point().setFrom3D(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z); // this direction
+  	Point v2 = new Point().setFrom3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z); // s direction
+  	Point r = new Point().setFrom3D(p1.x-s.p1.x, p1.y-s.p1.y, p1.z-s.p1.z); // s.p1 to this.p1
   	float a  = v1.dot(v1); // squared length of this
   	float e  = v2.dot(v2); // squared length of s
   	float f  = v2.dot(r);  // 
@@ -152,7 +157,7 @@ public class Segment implements Comparable<Segment>, Serializable {
   	if (a <= EPSILON && e <= EPSILON){
   		// Both degenerate into points
   		t1 = t2 = 0.0f;
-  		return new Segment(p1, s.p1,Segment.TEMPORARY, -1);
+  		return new Segment().setFrom2PointsTypeId(p1, s.p1,Segment.TEMPORARY, -1);
   	}
   	if (a <= EPSILON){
   		// This segment degenerate into point
@@ -179,8 +184,8 @@ public class Segment implements Comparable<Segment>, Serializable {
 				t2 = (b * t1 + f) / e;
   		}
   	}
-  	Vector3D c1 = p1.add(v1.scaleThis(t1)); // c1 = p1+t1*(p2-p1) 
-  	Vector3D c2 = s.p1.add(v2.scaleThis(t2)); // c2 = p1+t2*(p2-p1)
-		return new Segment(c1, c2);
+  	Point c1 = p1.add(v1.scaleThis(t1)); // c1 = p1+t1*(p2-p1) 
+  	Point c2 = s.p1.add(v2.scaleThis(t2)); // c2 = p1+t2*(p2-p1)
+		return new Segment().setFrom2Points(c1, c2);
   }
 }

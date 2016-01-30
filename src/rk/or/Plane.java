@@ -5,34 +5,34 @@ package rk.or;
  * a point P is in plane iff RP.N = 0 that is if OP.N = d with d = OR.N 
  */
 public class Plane {
-  Vector3D n;
+  Point n;
   float d;
   final static float THICKNESS = 10f;
   
   /** Define a plane across 2 points */
   public Plane across(Point p1, Point p2){
-    Vector3D o = new Vector3D((p1.x+p2.x)/2, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
-    n = new Vector3D(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z);
+    Point o = new Point().setFrom3D((p1.x+p2.x)/2, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
+    n = new Point().setFrom3D(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z);
     d = o.dot(n);
     return this;
   }
   /** Define a plane by 2 points along Z */
   public Plane by(Point p1, Point p2) {
-    Vector3D o = new Vector3D(p1.x, p1.y, p1.z);
-    n = new Vector3D(-(p2.y-p1.y), (p2.x-p1.x), 0);
+    Point o = new Point().setFrom3D(p1.x, p1.y, p1.z);
+    n = new Point().setFrom3D(-(p2.y-p1.y), (p2.x-p1.x), 0);
     d = o.dot(n);
     return this;
   }
   /** Plane orthogonal to Segment and passing by Point */
   public  Plane ortho(Segment s, Point p){
-    n = new Vector3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z);
+    n = new Point().setFrom3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z);
     d = p.dot(n);
     return this;
   }
   /** Intersection of This plane with Segment */
-  public Vector3D intersect(Segment s){
+  public Point intersect(Segment s){
     // (A+tAB).N=d <=> t=(d-A.N)/(AB.N) then Q=A+tAB 0<t<1
-    Vector3D ab = new Vector3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z);
+    Point ab = new Point().setFrom3D(s.p2.x-s.p1.x, s.p2.y-s.p1.y, s.p2.z-s.p1.z);
     float abn = ab.dot(n);
     if (abn == 0)
       return null;
@@ -42,9 +42,9 @@ public class Plane {
     return null;
   }
   /** Intersection of This plane with segment defined by two points */
-  public Vector3D intersect(Point a, Point b) {
+  public Point intersect(Point a, Point b) {
     // (A+tAB).N=d <=> t=(d-A.N)/(AB.N) then Q=A+tAB 0<t<1
-    Vector3D ab = new Vector3D(b.x-a.x, b.y-a.y, b.z-a.z);
+    Point ab = new Point().setFrom3D(b.x-a.x, b.y-a.y, b.z-a.z);
     float abn = ab.dot(n);
     // segment parallel to plane
     if (abn == 0) 
@@ -56,9 +56,9 @@ public class Plane {
     return null;
   }
   /** Classify point to thick plane 1 in front 0 on -1 behind */
-  public int classifyPointToPlane(Vector3D i) {
+  public int classifyPointToPlane(Point i) {
     // (A+tAB).N = d <=> d<e front, d>e behind, else on plane   
-  	float dist = d - Vector3D.dot(this.n, i);
+  	float dist = d - this.n.dot(i);
   	if (dist > THICKNESS)
   		return 1;
   	if (dist < -THICKNESS)

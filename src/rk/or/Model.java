@@ -44,7 +44,7 @@ public class Model implements Serializable {
   /** Adds a point to this Model or return the point at x,y */
   private Point addPoint(float x, float y) {
     // Create a new Point
-    Point p = new Point(x, y, idPoint++);
+    Point p = new Point().setFrom2DId(x, y, idPoint++);
     points.add(p);
     return p;
   }
@@ -65,7 +65,7 @@ public class Model implements Serializable {
   }
   /** Adds a segment to this model */
   private Segment addSegment(Point p1, Point p2, int type) {
-    Segment s = new Segment(p1, p2, type, idSegment++);
+    Segment s = new Segment().setFrom2PointsTypeId(p1, p2, type, idSegment++);
     segments.add(s);
     return s;
   }
@@ -78,7 +78,7 @@ public class Model implements Serializable {
   /** Splits Segment by a ratio k in  ]0 1[ counting from p1 */
   public void splitSegment(Segment s, float k){
     // Create new Point
-    Point p = new Point(s.p1.x+k*(s.p2.x-s.p1.x),
+    Point p = new Point().setFrom3DId(s.p1. x+k*(s.p2.x-s.p1.x),
         s.p1.y+k*(s.p2.y-s.p1.y),
         s.p1.z+k*(s.p2.z-s.p1.z), -1);
     splitSegmentOnPoint(s, p);
@@ -112,7 +112,7 @@ public class Model implements Serializable {
     float y = p1.y+k*(p2.y-p1.y);
     float z = p1.z+k*(p2.z-p1.z);
     // e is on p1p2 symmetric of p0
-    Point e = new Point(x, y, z, -1);
+    Point e = new Point().setFrom3DId(x, y, z, -1);
     // Define Plane
     Plane pl = new Plane().across(p0, e);
     splitFacesByPlane(pl,list);
@@ -138,10 +138,10 @@ public class Model implements Serializable {
 		// Segments cross themselves
 		if (Math.abs(c.p1.compareTo(c.p2)) < 1) { // c.p1 near c.p2
 			// Create new Point for the first segment
-			Point p1 = new Point(c.p1.x, c.p1.y, c.p1.z, -1);
+			Point p1 = new Point().setFrom3DId(c.p1.x, c.p1.y, c.p1.z, -1);
 			splitSegmentOnPoint(s1, p1);
 			// Create new Point for the second segment
-			Point p2 = new Point(c.p1.x, c.p1.y, c.p1.z, -1);
+			Point p2 = new Point().setFrom3DId(c.p1.x, c.p1.y, c.p1.z, -1);
 			splitSegmentOnPoint(s2, p2);	  
 		}	  
 	}
@@ -214,7 +214,7 @@ public class Model implements Serializable {
     }
     // Split all selected and intersecting faces
     for (Face f : listToSplit) {
-      splitFaceByPlane(f, pl);
+      splitOneFaceByPlane(f, pl);
     }
   }
 	
@@ -295,7 +295,7 @@ public class Model implements Serializable {
       dmax = 0;
       // Iterate over all segments
       // Pm is the medium point
-      Vector3D pm = new Vector3D(0,0,0);
+      Point pm = new Point().setFrom3D(0,0,0);
       for (Segment s : segs) {
         float lg3d = s.lg3d() / currentScale;
         float d = (s.lg2d - s.lg3d);
@@ -358,7 +358,7 @@ public class Model implements Serializable {
 	public void moveOnLine(Segment s, float k1, float k2, List<Point> pts) {
     for (Point p:pts) {
     	// Point n = s0.closestLine(new Segment(p,p)).p1;
-    	// First case if there is a segment joining pts[0] and s
+    	// First case if there is a segment joining point p and s search point common pc
     	Point pc = null, pd = null;
     	for (Segment si : segments) {
     		if (si.equals(p, s.p1)) {
@@ -375,8 +375,9 @@ public class Model implements Serializable {
     			break;
     		}
     	}
+    	// if we have pc point common and pd point distant
     	if (pc != null) {
-        // Turn p on pc pd (keep distance from Pc to P
+        // Turn p on pc pd (keep distance from Pc to P)
         float pcp = (float) Math.sqrt((pc.x-p.x)*(pc.x-p.x)
             + (pc.y-p.y)*(pc.y-p.y)
             + (pc.z-p.z)*(pc.z-p.z));
@@ -391,8 +392,9 @@ public class Model implements Serializable {
     	}
     	// Second case 
     	else {
+//    		System.out.println("Second case"); Oui ça arrive sur le boat
     		// Project point
-    		Point pp = s.closestLine(new Segment(p,p)).p1;
+    		Point pp = s.closestLine(new Segment().setFrom2Points(p,p)).p1;
     		// Move point p on projected pp
         p.x = (p.x+(pp.x-p.x))*k1 + p.x*k2;
         p.y = (p.y+(pp.y-p.y))*k1 + p.y*k2;
@@ -458,8 +460,8 @@ public class Model implements Serializable {
     }
   }
   /** Split face f by plane pl and add Points to joint faces (public for test) */
-  private void splitFaceByPlane(Face f1, Plane pl) {
-    Vector3D i = null;
+  private void splitOneFaceByPlane(Face f1, Plane pl) {
+    Point i = null;
     Point p1 = null, p2 = null;
     List<Point> frontSide = new LinkedList<Point>(); // Front side
     List<Point> backSide = new LinkedList<Point>(); // Back side
@@ -561,7 +563,6 @@ public class Model implements Serializable {
 
   	// Only if two different intersections has been found
   	if (p1 != null && p2 != null) {
-//    	System.out.println("Found\n frontSide:"+frontSide+ "\n backSide:"+backSide+"\n p1:"+p1+ " p2:"+p2+"\n");
     	// New back Face
     	Face f2 = new Face();
     	f2.offset = f1.offset;
@@ -575,7 +576,7 @@ public class Model implements Serializable {
   	} 
   }
   /** Look if the point A is already in the face, if not add it and return true */
-  private Point addPointToJointFace(Face f, Vector3D i, Point a, Point b) {
+  private Point addPointToJointFace(Face f, Point i, Point a, Point b) {
   	// If the point is already in the model no need to do anything
   	for (Point p : f.points) {
   		if (p.compareTo(i.x, i.y, i.z) == 0.0f) {
@@ -586,7 +587,7 @@ public class Model implements Serializable {
 
   	// Point i, not found, create, use to split segment, and add to the joint face
   	// Create new Point
-  	Point p = new Point(i.x, i.y, i.z, -1);
+  	Point p = new Point().setFrom3DId(i.x, i.y, i.z, -1);
   	// Get the segment to split
   	Segment s = searchSegment(a, b);
   	// Set 2D coordinates from 3D
@@ -701,7 +702,7 @@ public class Model implements Serializable {
   private Face searchFace(Segment s, Face f0) {
     Point a = s.p1, b = s.p2;
     for (Face f : faces){
-      if (!f.equals(f0)
+      if (( f0 != null && !f.equals(f0))
           && (f.points.contains(a))
           && (f.points.contains(b))){
         return f;

@@ -13,7 +13,6 @@ public class Face implements Serializable {
   private static final long serialVersionUID = 1L;
   private static final double EPSILON = 0.01;
   public List<Point> points;
-  public List<Segment> struts;
   public int id;
   public float[] normal = {0,0,1};
   public boolean select, highlight;
@@ -22,15 +21,10 @@ public class Face implements Serializable {
   /** A new face, no point, no segments */
   public Face(){
     points = new LinkedList<Point>();
-    struts = new LinkedList<Segment>();
   }
   /** We Override to select face from existing faces */
   public boolean equals(Object obj) {
 	  return this.id == ((Face)obj).id;
-  }
-  /** Add a strut (strut = entretoise) to this face */
-  public void addStrut(Segment s) {
-    struts.add(s); 
   }
 	/** Compute Face normal */
   public float[] computeFaceNormal() {
@@ -76,7 +70,7 @@ public class Face implements Serializable {
     v[2] /= d;
   }
   /** Compute Face center in 2D crease pattern */
-  public float[] center() {
+  public float[] center2D() {
     float[] center = new float[2];
     for (Point p : points){
       center[0] += p.xf;
