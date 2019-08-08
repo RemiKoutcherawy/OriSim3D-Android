@@ -1,4 +1,4 @@
-package rk.or;
+package rk.or.app;
 
 /** 
  * Plane defined by an origin point R and a normal vector N

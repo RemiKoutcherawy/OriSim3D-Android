@@ -1,4 +1,4 @@
-package rk.or;
+package rk.or.app;
 
 import android.util.FloatMath;
 
@@ -22,7 +22,7 @@ class LinearInterpolator implements Interpolator {
 /** Starts and ends slowly accelerate between "iad" */
 class AccelerateDecelerateInterpolator implements Interpolator {
   public float interpolate(float t) {
-    return ((FloatMath.cos((t + 1) * (float)Math.PI) / 2.0f) + 0.5f);
+    return (float) ((Math.cos((t + 1) * Math.PI) / 2.0f) + 0.5f);
   }
 }
 /** Model of a spring with overshoot "iso" */

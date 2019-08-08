@@ -1,15 +1,17 @@
-package rk.or;
+package rk.or.app.android;
 import android.view.MotionEvent;
-import rk.or.android.ModelView;
+import android.widget.Toast;
+
+import rk.or.app.Commands;
 
 /** 
  * Help View3D to deal with TouchEvents 
  */
-public class TouchHandler {
-  private ModelView mMainPane;
-  private float[] lastXY ={0,0, 0,0};
+class TouchHandler {
+  private final ModelView mMainPane;
+  private final float[] lastXY ={0,0, 0,0};
   private long lastDownTime, lastUpTime, lastUpUpTime;
-  boolean wasRunning = false;
+  private boolean wasRunning = false;
   private float lastX, lastY;
 
   /** Constructor only need mMainPane */
@@ -19,10 +21,16 @@ public class TouchHandler {
   }
 
   /** Deal with simple double touch, simple double triple tap */
-  public boolean onTouchEvent(MotionEvent e) {
+  public void onTouchEvent(MotionEvent e) {
   	// We receive only Pointer Count 1 or 2 and
   	// ACTION_DOWN(0) ACTION_UP(1) ACTION_MOVE(2) 
   	// ACTION_POINTER_2_DOWN(261) ACTION_POINTER_2_UP(262);
+	  // ACTION_POINTER_INDEX_MASK
+
+	CharSequence text = "Hello :"+e.getAction();
+	Toast toast = Toast.makeText(mMainPane, text, Toast.LENGTH_SHORT);
+	toast.show();
+
   	// One finger Up or Down 
     if (e.getPointerCount() == 1){
   		// One Pointer up 
@@ -118,7 +126,6 @@ public class TouchHandler {
   		lastXY[1]=e.getY(0);
   		lastXY[2]=e.getX(1);
   		lastXY[3]=e.getY(1);
-  	} 
-  	return true;
-  }                                                                                             
+  	}
+  }
 }

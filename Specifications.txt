@@ -1,3 +1,8 @@
+Déplacés pour Android Studio sous Gradle :
+ - /gen -> /app/build/generated
+ - /src -> /app/src/main/java
+ - /res -> /app/src/main/res
+
 Specifications
 1/ Définir le modèle, les plis (By, Cross, Perpendicular)
 2/ Plier (Rotate, Fold, Adjust, Move)
