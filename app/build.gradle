@@ -3,11 +3,11 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "rk.or.app"
+        applicationId "rk.or.android"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 6
+        versionName "OriSim3D-2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -25,4 +25,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // https://stackoverflow.com/questions/52776716/androidjunit4-class-is-deprecated-how-to-use-androidx-test-ext-junit-runners-an
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }

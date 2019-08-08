@@ -1,8 +1,8 @@
-package rk.or.app.android;
+package rk.or.android;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import rk.or.app.Commands;
+import rk.or.Commands;
 
 /** 
  * Help View3D to deal with TouchEvents 

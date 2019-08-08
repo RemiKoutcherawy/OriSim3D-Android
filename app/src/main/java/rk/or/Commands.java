@@ -1,4 +1,4 @@
-package rk.or.app;
+package rk.or;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,17 +13,26 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import rk.or.app.android.ModelView;
+import rk.or.android.ModelView;
+import rk.or.AccelerateDecelerateInterpolator;
+import rk.or.AnticipateInterpolator;
+import rk.or.AnticipateOvershootInterpolator;
+import rk.or.BounceInterpolator;
+import rk.or.GravityBounceInterpolator;
+import rk.or.LinearInterpolator;
+import rk.or.OvershootInterpolator;
+import rk.or.SpringBounceInterpolator;
+import rk.or.SpringOvershootInterpolator;
 
-/** 
- * Commands are interpreted here 
- * deals with animation, undo, pause with a state machine 
+/**
+ * Commands are interpreted here
+ * deals with animation, undo, pause with a state machine
  */
 public class Commands {
   public ModelView mainPane;
   // Serialized model to undo
-  private LinkedList<byte[]> undo; 
-  // Done Commands 
+  private LinkedList<byte[]> undo;
+  // Done Commands
   private LinkedList<String> done;
   // States
   public enum State {idle, run, anim, pause, undo};
@@ -33,19 +42,19 @@ public class Commands {
   // Folding command and index in command[] and no scanned
   private String[] todo;
   private int iTok, p, iBeginAnim;
-  // tstart and duration give tn = (t-tstart-pauseDuration)/duration from 0 to 100% 
+  // tstart and duration give tn = (t-tstart-pauseDuration)/duration from 0 to 100%
   private long tstart, duration, pauseStart, pauseDuration = 0 ;
   // Time interpolated at instant p preceding and at instant n current
   private float tni=1, tpi=0;
   // scale, cx, cy, cz used in ZoomFit
-  private float[] za = {0,0,0,0}; 
+  private float[] za = {0,0,0,0};
   // Interpolator used in anim() to map tn (time normalized) to tni (time interpolated)
   private Interpolator interpolator = new LinearInterpolator();
   // Angle used for fold as a starting value when animation starts
   private float angleBefore;
   // Coefficient to multiply value given in Offset commands
   private float kOffset = 0.2f; // 0.2f for real rendering
-  
+
   /** Constructor initialize linked list */
   public Commands(ModelView panel) {
     mainPane = panel;
@@ -54,11 +63,11 @@ public class Commands {
     state = State.idle;
   }
 
-  /** Main entry point on state machine */ 
+  /** Main entry point on state machine */
   public synchronized void command(String cde){
 // -- State Idle tokenize list of command
     if (state == State.idle) {
-      if (cde.equals("u")) { 
+      if (cde.equals("u")) {
         Collections.reverse(done);
         todo = done.toArray(new String[0]);
         Collections.reverse(done);
@@ -71,7 +80,7 @@ public class Commands {
         undo.clear();
         // Continue to Execute
       } else if (cde.equals("co") || cde.equals("pa")) {
-        // In idle, no job, continue, or pause are irrelevant 
+        // In idle, no job, continue, or pause are irrelevant
         return;
       } else if (cde.startsWith("d")) {
         // Starts a new folding
@@ -85,18 +94,18 @@ public class Commands {
       commandLoop();
       return;
     }
-// -- State Run execute list of command  
+// -- State Run execute list of command
     if (state == State.run) {
       commandLoop();
       return;
-    } 
-// -- State Animation execute up to ')' or pause  
+    }
+// -- State Animation execute up to ')' or pause
     if (state == State.anim) {
       // "Pause"
-      if (cde.equals("pa")) { 
+      if (cde.equals("pa")) {
         state = State.pause;
       }
-      return; 
+      return;
     }
 // -- State Paused in animation
     if (state == State.pause) {
@@ -139,22 +148,22 @@ public class Commands {
       	// Mark
   			pushUndo();
     	  // Time t duration ... )
-        done.addFirst(todo[iTok++]); 
+        done.addFirst(todo[iTok++]);
         // iTok will be incremented by duration = get()
-        done.addFirst(todo[iTok]);  
+        done.addFirst(todo[iTok]);
         duration = (long) get();
         pauseDuration = 0;
         state = State.anim;
-        animStart(); 
+        animStart();
         // Return breaks the loop, giving control to anim
         return;
       } else if (todo[iTok].equals(")")) {
-        // Finish pushing command 
+        // Finish pushing command
         done.addFirst(todo[iTok++]);
         continue;
       }
       int iBefore = iTok;
-      
+
       // Execute one command
       int iReached = execute();
 
@@ -164,8 +173,8 @@ public class Commands {
       while (iBefore < iReached) {
         done.addFirst(todo[iBefore++]);
       }
-      // Post an event to repaint 
-      // The repaint will not occur till next animation, or end Cde 
+      // Post an event to repaint
+      // The repaint will not occur till next animation, or end Cde
       mainPane.view3d.requestRender();
     }
     // End of command line switch to idle
@@ -179,9 +188,9 @@ public class Commands {
       // Call View3D.animate() witch sets a flag animated=true and calls repaint()
       // The flag animated=true if tested after each draw() and if true call anim()
       mainPane.view3d.animate(this);
-      tpi = 0.0f; 
+      tpi = 0.0f;
   }
-  /** Called from View3D at each redraw 
+  /** Called from View3D at each redraw
    *  return true if anim should continue false if anim should end */
   public boolean anim() {
     if (state == State.undo) {
@@ -202,22 +211,22 @@ public class Commands {
     long t = System.currentTimeMillis();
     // Compute tn varying from 0 to 1
     float tn = (t-tstart-pauseDuration)/(float)duration; // tn from 0 to 1
-    if (tn > 1.0f) 
+    if (tn > 1.0f)
       tn = 1.0f;
     tni = interpolator.interpolate(tn);
-    
+
     // Execute commands just after t xxx up to including ')'
     iBeginAnim = iTok;
     while (!todo[iTok].equals(")")) {
       execute();
     }
-    // For undoing animation 
+    // For undoing animation
     // We are only interested in model, not in command
     pushUndo();
-    
+
     // Keep t preceding tn
     tpi = tni; // t preceding
-    
+
     // If Animation will finish, set end values
     if (tn >= 1.0f) {
       tni = 1.0f;
@@ -225,7 +234,7 @@ public class Commands {
       // Push done
       while (iBeginAnim < iTok) {
       	// Time t duration ... )
-        done.addFirst(todo[iBeginAnim++]); 
+        done.addFirst(todo[iBeginAnim++]);
       }
       // Switch back to run and launch next cde
       state = State.run;
@@ -233,8 +242,8 @@ public class Commands {
       // If commandLoop has launched another animation we continue
       if (state == State.anim)
       	return true;
-      // OK we stop anim 
-      return false; 
+      // OK we stop anim
+      return false;
     }
     // Rewind to continue animation
     iTok = iBeginAnim;
@@ -255,7 +264,7 @@ public class Commands {
       done.poll();
       String tok = todo[iTok];
       // Undo Mark, or beginning Define
-      if (tok.equals("d") || tok.equals("t")) 
+      if (tok.equals("d") || tok.equals("t"))
         break;
     }
     // We have rewound to 't' or 'd', launch the sequence to undo to iTok
@@ -271,7 +280,7 @@ public class Commands {
     undo.addFirst(mainPane.model.getSerialized());
     undo.addFirst(getSerialized(done.size()));
   }
-  /** Serial encoder for index in todo string. 
+  /** Serial encoder for index in todo string.
    * Returns byte[] array with one Integer for the int parameter */
   private byte[] getSerialized(int i) {
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
@@ -286,7 +295,7 @@ public class Commands {
     }
     return bs.toByteArray();
   }
-  /** Serial decoder for index 
+  /** Serial decoder for index
    * Returns int from the byte[] array  parameter */
   private int deserialize(byte[] buf) {
     Integer ret = 0;
@@ -301,11 +310,11 @@ public class Commands {
     }
     return ret.intValue();
   }
-  /** Pop undo index, model and return index */ 
+  /** Pop undo index, model and return index */
   private int popUndo() {
     byte[] index = undo.poll();
     byte[] model = undo.poll();
-    if (index == null) return 0; 
+    if (index == null) return 0;
     ByteArrayInputStream bais = new ByteArrayInputStream(model);
     ObjectInputStream dec;
     try {
@@ -324,46 +333,46 @@ public class Commands {
     // Commands
     if (todo[iTok].equals("d")) { // "d : define"
       // Define sheet by 4 points x,y CCW
-      iTok++; 
+      iTok++;
       model.init(get(), get(), get(), get(), get(), get(), get(), get());
-    } 
+    }
     // Origami splits
     else if (todo[iTok].equals("b")) { // "b : by"
       // Split by two points all (or listed) faces
-      iTok++; 
+      iTok++;
       Point a = model.points.get((int) get());
       Point b = model.points.get((int) get());
       model.splitBy(a, b, listFaces(model));
     } else if (todo[iTok].equals("c")){ // "c : cross"
       // Split across two points all (or just listed) faces
-      iTok++; 
+      iTok++;
       Point a = model.points.get((int) get());
       Point b = model.points.get((int) get());
       model.splitAcross(a, b, listFaces(model));
     } else if (todo[iTok].equals("p") ){ // "p : perpendicular"
-      // Split perpendicular of line by point all (or listed) faces 
-      iTok++; 
+      // Split perpendicular of line by point all (or listed) faces
+      iTok++;
       Segment s = model.segments.get((int) get());
       Point p = model.points.get((int) get());
       model.splitOrtho(s, p, listFaces(model));
     } else if (todo[iTok].equals("lol") ){ // "lol : LineOnLine"
-      // Split by a plane passing between segments all (or listed) faces 
-      iTok++; 
+      // Split by a plane passing between segments all (or listed) faces
+      iTok++;
       Segment s0 = model.segments.get((int) get());
       Segment s1 = model.segments.get((int) get());
       model.splitLineToLine(s0, s1, listFaces(model));
-    } 
+    }
     // Segments splits
     else if (todo[iTok].equals("s") ){ // "s : split segment numerator denominator"
       // Split segment by N/D
-      iTok++; 
+      iTok++;
       Segment s = model.segments.get((int) get());
       float n = get();
       float d = get();
       model.splitSegment(s, n/d);
     } else if (todo[iTok].equals("sc") ){ // "sc : split segment crossing"
       // Split segment where they cross
-      iTok++; 
+      iTok++;
       Segment s1 = model.segments.get((int) get());
       Segment s2 = model.segments.get((int) get());
       model.splitSegmentCrossing(s1, s2);
@@ -371,16 +380,16 @@ public class Commands {
     // Animation commands use tni tpi
     else if (todo[iTok].equals("r")){ // " r : rotate"
       // Rotate Seg Angle Points with animation
-      iTok++; 
+      iTok++;
       Segment s = model.segments.get((int) get());
       float angle = (float) (get() * (tni - tpi));
       model.rotate(s, angle, listPoints(model));
     } else if (todo[iTok].equals("f")){ // "f : fold to angle"
-      iTok++; 
+      iTok++;
       Segment s = model.segments.get((int) get());
       // Cache current angle at start of animation
       // TODO accept multiple folds, multiples angles in one animation
-      if (tpi == 0) 
+      if (tpi == 0)
       	angleBefore = model.computeAngle(s);
       float angle = (float) ((get() - angleBefore) * (tni - tpi));
       List<Point> list = listPoints(model);
@@ -388,82 +397,82 @@ public class Commands {
       if (tpi == 0 && model.faceRight(s.p1, s.p2).points.contains(list.get(0)))
       	s.reverse();
       model.rotate(s, angle, list);
-    } 
-    // Adjust points 
+    }
+    // Adjust points
     else if (todo[iTok].equals("a")){ // "a : adjust"
       // Adjust Points in 3D to fit 3D length
-      iTok++; 
-      model.adjust(listPoints(model)); 
-    } 
+      iTok++;
+      model.adjust(listPoints(model));
+    }
     // Adjust point with only given segments
     else if (todo[iTok].equals("as")){ // "as : adjust point segments"
       // Adjust Points in 3D to fit 3D length
-      iTok++; 
+      iTok++;
       Point p0 = model.points.get((int)get());
-      model.adjustSegments(p0, listSegments(model)); 
-    } 
-    
+      model.adjustSegments(p0, listSegments(model));
+    }
+
     else if (todo[iTok].equals("flat") ){ // "flat : z = 0"
       // Move all point to z = 0
-      iTok++; 
+      iTok++;
       model.flat(listPoints(model));
     }
     // Offsets
     else if (todo[iTok].equals("o")){ // "o : offset"
       // Offset by dz the list of faces : o dz f1 f2...
-      iTok++; 
+      iTok++;
       float dz = get()*kOffset;
       model.offset(dz, listFaces(model));
     } else if (todo[iTok].equals("od")){ // "od : offset decal"
-      // Get the maximal offset of all listed faces add 1 
-    	// and subtract for all listed faces (or all if none listed) 
-      iTok++; 
+      // Get the maximal offset of all listed faces add 1
+    	// and subtract for all listed faces (or all if none listed)
+      iTok++;
       float dz = get()*kOffset;
       model.offsetDecal(dz, listFaces(model));
     } else if (todo[iTok].equals("oa")){ // "oa : offsetAdd"
       // Add Offset dz to the list of faces : oa dz f1 f2...
-      iTok++; 
+      iTok++;
       float dz = get()*kOffset;
       model.offsetAdd(dz, listFaces(model));
     } else if (todo[iTok].equals("om")){ // "om : offsetMul"
       // Multiply Offset by k for all faces : om k
-      iTok++; 
+      iTok++;
       float k = get();
       model.offsetMul(k, listFaces(model));
     } else if (todo[iTok].equals("ob")){ // "ob : offsetBetween"
-      iTok++; 
+      iTok++;
       model.offsetBetween(listFaces(model));
     }
     // Moves
     else if (todo[iTok].equals("m")){ // "m : move dx dy dz pts"
       // Move 1 Point in 3D with Coefficient for animation
-      iTok++; 
-      model.move(get()*(tni-tpi), get()*(tni-tpi), get()*(tni-tpi),listPoints(model)); 
+      iTok++;
+      model.move(get()*(tni-tpi), get()*(tni-tpi), get()*(tni-tpi),listPoints(model));
     } else if (todo[iTok].equals("mo")){ // "mo : move on"
       // Move all points on one with animation
-      iTok++; 
+      iTok++;
       Point p0 = model.points.get((int)get());
       float k2 = (float)((1-tni)/(1-tpi));
       float k1 = (float)(tni - tpi*k2);
-      model.moveOn(p0, k1, k2, listPoints(model)); 
+      model.moveOn(p0, k1, k2, listPoints(model));
     }  else if (todo[iTok].equals("mol")){ // "mol : move on line"
       // Move all points on line with animation
-      iTok++; 
+      iTok++;
       Segment p0 = model.segments.get((int)get());
       float k2 = (float)((1-tni)/(1-tpi));
       float k1 = (float)(tni - tpi*k2);
       model.moveOnLine(p0, k1, k2, listPoints(model));
     }  else if (todo[iTok].equals("stp")){ // "stp : stick on point"
       // Move all points on one no animation
-      iTok++; 
+      iTok++;
       Point p0 = model.points.get((int)get());
-    	model.moveOn(p0, 1, 0, listPoints(model)); 
+    	model.moveOn(p0, 1, 0, listPoints(model));
     }  else if (todo[iTok].equals("stl")){ // "stl : stick on line"
       // Move all points on line with animation
-      iTok++; 
+      iTok++;
       Segment p0 = model.segments.get((int)get());
       model.moveOnLine(p0, 1, 0, listPoints(model));
-    } 
+    }
     // Turns
     else if (todo[iTok].equals("tx")){ // "tx : TurnX"
       iTok++; model.turn(get()*(tni - tpi), 1);
@@ -471,10 +480,10 @@ public class Commands {
       iTok++; model.turn(get()*(tni - tpi), 2);
     } else if (todo[iTok].equals("tz")){ // "tz : TurnZ"
       iTok++; model.turn(get()*(tni - tpi), 3);
-    } 
+    }
     // Zooms
-    else if (todo[iTok].equals("z")){ // "z : Zoom scale,x,y" 
-      iTok++; 
+    else if (todo[iTok].equals("z")){ // "z : Zoom scale,x,y"
+      iTok++;
       float scale = get(), x = get(), y = get();
       // for animation
       float ascale = (float)((1+tni*(scale-1))/(1+tpi*(scale-1)));
@@ -494,7 +503,7 @@ public class Commands {
       float bfactor = (float) (za[0]*(tni/scale -tpi));
       model.move(za[1]*bfactor, za[2]*bfactor, 0, null);
       model.scaleModel(scale);
-    } 
+    }
     // Interpolators
     else if (todo[iTok].equals("il")){ // "il : Interpolator Linear"
       iTok++; interpolator = new LinearInterpolator();
@@ -517,21 +526,21 @@ public class Commands {
     }
     // Mark points and segments
     else if (todo[iTok].equals("pt")){ // "select points"
-    	iTok++; 
+    	iTok++;
     	model.selectPts(listPoints(model));
     } else if (todo[iTok].equals("seg")){ // "select segments"
-    	iTok++; 
+    	iTok++;
     	model.selectSegs(listSegments(model));
-    } 
+    }
     // Fall through
-    else if (todo[iTok].equals("t") || todo[iTok].equals(")") 
+    else if (todo[iTok].equals("t") || todo[iTok].equals(")")
     		|| todo[iTok].equals("u") || todo[iTok].equals("co")
     		|| todo[iTok].equals("end")) {
       iTok++;
       return -1;
     } else {
     	// ignore dangling token
-    	iTok++; 
+    	iTok++;
     }
     return iTok;
   }
@@ -546,7 +555,7 @@ public class Commands {
       }
 	  return list;
   }
-  /** Make a list from following segments numbers */ 
+  /** Make a list from following segments numbers */
   private List<Segment> listSegments(Model model) {
 	  List<Segment> list = new LinkedList<Segment>();
 	  while (!Float.isNaN(get()))
@@ -557,7 +566,7 @@ public class Commands {
       }
 	  return list;
   }
-  /** Make a list from following faces numbers */ 
+  /** Make a list from following faces numbers */
 	private List<Face> listFaces(Model model) {
 		List<Face> list = new LinkedList<Face>();
 		while (!Float.isNaN(get()))
@@ -569,7 +578,7 @@ public class Commands {
     ArrayList<String> matchList = new ArrayList<String>();
     StringBuffer sb = new StringBuffer();
     boolean lineComment = false;
-    
+
     for (int i = 0; i < input.length(); i++){
       char c = input.charAt(i);
       if (c == ' ' || c == '\r' || c == '\n') {
@@ -590,7 +599,7 @@ public class Commands {
         // done with this two token
         sb.delete(0, sb.length());
       } else if (c == '/' ) {
-      	// Skip to the end of line, 
+      	// Skip to the end of line,
         for (; input.charAt(i) != '\n' && i < input.length()-1; i++);
         lineComment = true;
       }
@@ -598,7 +607,7 @@ public class Commands {
       	// keep character to form the token
         sb.append(c);
       }
-    } 
+    }
     // Take care of input ending with a token
     char c = input.charAt(input.length()-1);
     if (c != ' ' && c != '\r' && c != '\n' && c != ')' && !lineComment){

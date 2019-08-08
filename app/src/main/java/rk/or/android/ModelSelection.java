@@ -1,4 +1,4 @@
-package rk.or.app.android;
+package rk.or.android;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import rk.or.app.R;
+import rk.or.android.R;
 
 /**
  * Activity for model selection

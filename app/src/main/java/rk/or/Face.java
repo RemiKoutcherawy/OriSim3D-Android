@@ -1,4 +1,4 @@
-package rk.or.app;
+package rk.or;
 
 import java.io.Serializable;
 import java.util.LinkedList;

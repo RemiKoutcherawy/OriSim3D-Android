@@ -1,11 +1,9 @@
-package rk.or.app.android;
+package rk.or.android;
 
-import rk.or.app.Commands;
-import rk.or.app.Model;
-import rk.or.app.R;
+import rk.or.Commands;
+import rk.or.Model;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.Window;
 
@@ -47,11 +45,9 @@ public class ModelView extends Activity {
 
     // Ne marche pas vu que le jar ne contient plus de ressources
 //    commands.command("read "+modelName);
-    String text = getText(R.string.cocotte).toString();
-//    Context context = getApplicationContext();
-//    CharSequence text = "Hello toast!";
-//    Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
-//    toast.show();
+//    String text = getText(R.string.cocotte).toString();
+    // For testing, just a square
+    String text = "d -200 200 -200 -200 200 -200 200 200";
     commands.command(text);
   }
 

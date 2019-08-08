@@ -1,4 +1,4 @@
-package rk.or.app;
+package rk.or;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.io.IOException;
  */
 public class Model implements Serializable {
   private static final long serialVersionUID = 1L;
-  public List<Point> points;   
+  public List<Point> points;
   public List<Face> faces;
   public List<Segment> segments;
   public int idPoint, idSegment, idFace;

@@ -1,6 +1,6 @@
-package rk.or.app;
+package rk.or;
 
-/** 
+/**
  * Plane defined by an origin point R and a normal vector N
  * a point P is in plane iff RP.N = 0 that is if OP.N = d with d = OR.N 
  */

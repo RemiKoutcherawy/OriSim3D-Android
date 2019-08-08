@@ -1,8 +1,6 @@
-package rk.or.app;
+package rk.or;
 
-import android.util.FloatMath;
-
-/** 
+/**
  * Maps time to time 
  * interpolate(tn) returns t for tn. 
  * t and tn should start at 0.0 and end at 1.0

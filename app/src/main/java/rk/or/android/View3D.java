@@ -1,4 +1,4 @@
-package rk.or.app.android;
+package rk.or.android;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -9,11 +9,11 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import rk.or.app.Commands;
-import rk.or.app.Face;
-import rk.or.app.Model;
-import rk.or.app.Point;
-import rk.or.app.Segment;
+import rk.or.Commands;
+import rk.or.Face;
+import rk.or.Model;
+import rk.or.Point;
+import rk.or.Segment;
 
 import android.content.Context;
 import android.opengl.GLES20;
