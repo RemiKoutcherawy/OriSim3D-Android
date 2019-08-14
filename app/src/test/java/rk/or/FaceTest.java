@@ -2,12 +2,20 @@ package rk.or;
 
 import org.junit.Test;
 
-import rk.or.Face;
-import rk.or.Point;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class FaceTest {
+
+    @Test
+    public void init() {
+        Face f = new Face();
+        assertEquals(0, f.points.size());
+        assertEquals(3, f.normal.length);
+        assertFalse(f.select);
+        assertFalse(f.highlight);
+        assertEquals(0, f.offset, 0.01f);
+    }
 
     @Test
     public void computeFaceNormal() {

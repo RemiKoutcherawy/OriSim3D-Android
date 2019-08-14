@@ -1,0 +1,5 @@
+View3D.front = R.drawable.gally400x572;
+View3D.back = R.drawable.blue32x32;
+View3D.back = R.drawable.sunako400x572;
+hulk400x566.jpg
+ville822x679.jpg

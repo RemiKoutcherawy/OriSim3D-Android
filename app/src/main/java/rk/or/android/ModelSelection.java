@@ -11,8 +11,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import rk.or.android.R;
-
 /**
  * Activity for model selection
  */
@@ -35,9 +33,9 @@ public class ModelSelection extends Activity implements OnItemClickListener {
 
     // Thumbs are in res/drawable and raw are in src/rk/or/raw
     private final Integer[] mThumbIds = {
-            R.drawable.cocotte72x72, R.drawable.duck72x72, R.drawable.boat72x72,
-            R.drawable.austria72x72, R.drawable.blueyellow72x72, R.drawable.gally72x72};
-    private final String[] mModels = { "cocotte", "duck", "boat", "austria", "", "" };
+            R.drawable.cocotte72x72, R.drawable.duck72x72, R.drawable.boat72x72, R.drawable.austria72x72};
+    private final int[] mModels = {
+            R.raw.cocotte, R.raw.duck, R.raw.boat, R.raw.austria};
 
     // Set views for icons
     class AppsAdapter extends BaseAdapter {

@@ -2,9 +2,7 @@ package rk.or;
 
 import org.junit.Test;
 
-import rk.or.Model;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ModelTest {
 
@@ -12,7 +10,6 @@ public class ModelTest {
     public void init() {
         Model model = new Model();
         model.init(-200, -200, 200, -200, 200, 200, -200, 200);
-        assertEquals(4, 2 + 2);
         assertEquals(4, model.points.size());
         assertEquals(4, model.segments.size());
         assertEquals(1, model.faces.size());

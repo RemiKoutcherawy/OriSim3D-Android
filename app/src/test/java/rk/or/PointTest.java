@@ -2,8 +2,6 @@ package rk.or;
 
 import org.junit.Test;
 
-import rk.or.Point;
-
 import static org.junit.Assert.assertEquals;
 
 public class PointTest {

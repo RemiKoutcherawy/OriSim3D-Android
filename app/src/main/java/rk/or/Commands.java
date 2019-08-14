@@ -113,7 +113,7 @@ public class Commands {
       if (cde.equals("co")) {
         pauseDuration = System.currentTimeMillis() - pauseStart;
         // Continue animation
-        mainPane.view3d.animate(this);
+//        mainPane.view3d.animate(this);
         state = State.anim;
       } else if (cde.equals("u")) {
       	// Undo one step
@@ -175,7 +175,7 @@ public class Commands {
       }
       // Post an event to repaint
       // The repaint will not occur till next animation, or end Cde
-      mainPane.view3d.requestRender();
+//      mainPane.view3d.requestRender();
     }
     // End of command line switch to idle
     if (state == State.run){
@@ -187,7 +187,7 @@ public class Commands {
       tstart = System.currentTimeMillis();
       // Call View3D.animate() witch sets a flag animated=true and calls repaint()
       // The flag animated=true if tested after each draw() and if true call anim()
-      mainPane.view3d.animate(this);
+//      mainPane.view3d.animate(this);
       tpi = 0.0f;
   }
   /** Called from View3D at each redraw
@@ -272,7 +272,7 @@ public class Commands {
     state = State.undo;
   	undoInProgress = true;
     // Launch animation to popUndo until iTok reached
-    mainPane.view3d.animate(this);
+//    mainPane.view3d.animate(this);
     return;
   }
   /** Push undo */
