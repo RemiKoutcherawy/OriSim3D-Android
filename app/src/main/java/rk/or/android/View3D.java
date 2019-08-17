@@ -1,5 +1,15 @@
 package rk.or.android;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
+import android.opengl.Matrix;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -13,47 +23,48 @@ import rk.or.Model;
 import rk.or.Point;
 import rk.or.Segment;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
-import android.util.Log;
-import android.view.MotionEvent;
-
-// View 3D with Touch handler to pause undo rotate zoom
-// Handles double touch with rk.or.TouchHandler
+// View 3D with Touch handler to rotate zoom
 public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Mouse Rotation
-    private double mAngleX=0, mAngleY=0, mAngleZ=0, mdx=0, mdy=0, mdz=0;
+    private float mAngleX = 0, mAngleY = 0, mAngleZ = 0;
+    private float scale = 1.0f;
 
     // Model and Projection matrix
-    private float[] mvm = new float[16]; // uModelViewMatrix
-    private float[] mvp = new float[16]; // uProjectionMatrix
-
-    // View size
-    int width = 1080, height = 1731;
+    private final float[] mvm = new float[16]; // uModelViewMatrix
+    private final float[] mvp = new float[16]; // uProjectionMatrix
 
     // program
     private int program;
 
     // Touch
-    private TouchHandler touchHandler;
+    private float mLastX, mLastY;
+    private static final int INVALID_POINTER_ID = -1;
+    private int activePointerId = INVALID_POINTER_ID;
+    private final ScaleGestureDetector mScaleDetector;
+
     // Flag to rebuild buffers
     public static boolean needRebuild = true;
+
     // Needed to access model
     private final ModelView mMainPane;
 
     // Texture size, set in initTextures, used in initBuffers
-    private float wTexFront= 0, hTexFront = 0;
+    private float wTexFront = 0, hTexFront = 0;
     private float wTexBack = 0, hTexBack = 0;
     private int[] textures;
 
     // Number of Points, and buffers
-    private int nbPts, nbPtsLines;
-    FloatBuffer frontVertex, backVertex, frontNormal, backNormal, frontTex, backTex, lineVertex;
+    private int nbPts;
+    private FloatBuffer frontVertex;
+    private FloatBuffer backVertex;
+    private FloatBuffer frontNormal;
+    private FloatBuffer backNormal;
+    private FloatBuffer frontTex;
+    private FloatBuffer backTex;
+    // Todo show lines
+    int nbPtsLines;
+    private FloatBuffer lineVertex;
 
     // View3D shows and does Rendering
     public View3D(Context context) {
@@ -67,43 +78,98 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         // RENDERMODE_WHEN_DIRTY or RENDERMODE_CONTINUOUSLY ?
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
-        touchHandler = new TouchHandler(mMainPane);
+        // ScaleListener
+        this.mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+        mScaleDetector.getTimeDelta();
+        // How to implement also GestureDetector.SimpleOnGestureListener ? to get onDoubleTap ?
+    }
+
+    // ------ Touch event handling ------
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+
+            scale *= detector.getScaleFactor();
+            scale = Math.max(0.1f, Math.min(scale, 5.0f));
+
+            return true;
+        }
     }
 
     @Override
-    // Forward MotionEvent to a specific class
-    public boolean onTouchEvent(MotionEvent e) {
-        touchHandler.onTouchEvent(e);
+    public boolean onTouchEvent(MotionEvent ev) {
+        mScaleDetector.onTouchEvent(ev);
+
+        final int action = ev.getAction();
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN: {
+                final float x = ev.getX();
+                final float y = ev.getY();
+                mLastX = x;
+                mLastY = y;
+                activePointerId = ev.getPointerId(0);
+                // Hack to get onDoubleTap
+                if (mScaleDetector.getTimeDelta() < 200.0f) {
+                    mAngleX = mAngleY = mAngleZ = 0;
+                    scale = 1.0f;
+                    super.performClick();
+                }
+                break;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                final int pointerIndex = ev.findPointerIndex(activePointerId);
+                final float x = ev.getX(pointerIndex);
+                final float y = ev.getY(pointerIndex);
+
+                // Only rotate if the ScaleGestureDetector isn't processing a gesture.
+                if (!mScaleDetector.isInProgress()) {
+                    final float dx = (x - mLastX);
+                    final float dy = (y - mLastY);
+
+                    // Dividing by 4 enougth to flip 180°
+                    mAngleX += dx / 4.0f;
+                    mAngleY += dy / 4.0f;
+                }
+                mLastX = x;
+                mLastY = y;
+                break;
+            }
+
+            case MotionEvent.ACTION_UP: {
+                activePointerId = INVALID_POINTER_ID;
+                break;
+            }
+
+            case MotionEvent.ACTION_CANCEL: {
+                activePointerId = INVALID_POINTER_ID;
+                break;
+            }
+
+            case MotionEvent.ACTION_POINTER_UP: {
+                // New API
+                final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+
+                final int pointerId = ev.getPointerId(pointerIndex);
+                if (pointerId == activePointerId) {
+                    final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+                    mLastX = ev.getX(newPointerIndex);
+                    mLastY = ev.getY(newPointerIndex);
+                    activePointerId = ev.getPointerId(newPointerIndex);
+                }
+                break;
+            }
+        }
+
+        // Don't forget to redraw
         requestRender();
-        performClick();
+
         return true;
     }
 
-    @Override
-    // Just to avoid a warning.
-    public boolean performClick() {
-        return super.performClick();
-    }
-
-    // Rotation called from onTouchEvent
-    public void rotateXY(float angleX, float angleY) {
-        mAngleX += angleX;
-        mAngleY += angleY;
-    }
-
-    // Rotation and zoom called from onTouchEvent
-    public void rotateZoom(float angle, float dx, float dy, float dd) {
-        mAngleZ += angle;
-        mdx += dx;
-        mdy += dy;
-        mdz += dd;
-    }
-
-    // Restore rotation to identity
-    public void rotateRestore() {
-        mAngleX = mAngleY = mAngleZ = mdx = mdy = mdz = 0;
-    }
-
+    // ------ GLES20 part ------
     // Called by system
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -117,7 +183,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     }
 
     // Shaders
-    private void initShaders () {
+    private void initShaders() {
         // Initialize Shaders
         String vertexShader =
         "    attribute vec4 aVertexPosition;\n" +
@@ -140,7 +206,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glCompileShader(vxShader);
 
         String fragmentShader =
-        "    precision highp float;\n"+
+        "    precision highp float;\n" +
         "    uniform sampler2D uSampler;\n" +
         "    varying highp vec2 vTexCoord;\n" +
         "    varying highp vec3 vLight;\n" +
@@ -216,13 +282,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         }
 
         // Basic frustum at a distance of 700
-        float dx = right - left;
-        float dy = top - bottom;
-        float dz = far - near;
-        mvp[0] = 2*near/dx; mvp[1] = 0.0f; mvp[2] = 0.0f; mvp[3] = 0.0f;
-        mvp[4] = 0.0f; mvp[5] = 2*near/dy; mvp[6] = 0.0f; mvp[7] = 0.0f;
-        mvp[8] = (left+right)/dx; mvp[9] = (top+bottom)/dy; mvp[10] = -(far+near) / dz; mvp[11] = -1.0f;
-        mvp[12] = 0.0f; mvp[13] = 0.0f; mvp[14] = -2*near*far / dz; mvp[15] = 0.0f;
+        Matrix.frustumM(mvp, 0, left, right, bottom, top, near, far);
 
         // Step back
         mvp[15] += 700;
@@ -230,35 +290,21 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Model view, rotation, and scale
     private void setModelView() {
-        // Rotation around X axis -> e
-        float s = (float) Math.sin(mAngleY/200);
-        float c = (float) Math.cos(mAngleY/200);
-        mvm[0] = 1;mvm[4] = 0;mvm[8] = 0;mvm[12] = 0;
-        mvm[1] = 0;mvm[5] = c;mvm[9] = -s;mvm[13] = 0;
-        mvm[2] = 0;mvm[6] = s;mvm[10] = c;mvm[14] = 0;
-        mvm[3] = 0;mvm[7] = 0;mvm[11] = 0;mvm[15] = 1;
 
-        // Rotation around Y axis e -> f
-        float[] f = new float[16];
-        s = (float) Math.sin(mAngleX/100);
-        c = (float) Math.cos(mAngleX/100);
-        f[0] = c*mvm[0]-s*mvm[8];f[4] = mvm[4];f[8]  = c*mvm[8]+s*mvm[0];f[12] = mvm[12];
-        f[1] = c*mvm[1]-s*mvm[9];f[5] = mvm[5];f[9]  = c*mvm[9]+s*mvm[1];f[13] = mvm[13];
-        f[2] = c*mvm[2]-s*mvm[10];f[6] = mvm[6];f[10] = c*mvm[10]+s*mvm[2];f[14] = mvm[14];
-        f[3] = c*mvm[3]-s*mvm[11];f[7] = mvm[7];f[11] = c*mvm[11]+s*mvm[3];f[15] = mvm[15];
+        // One finger rotates the object
+        Matrix.setIdentityM(mvm, 0);
+        Matrix.rotateM(mvm, 0, mAngleX, 0, 1, 0); // Yes there is an inversion between X and Y
+        Matrix.rotateM(mvm, 0, mAngleY, 1, 0, 0);
 
-        // Scale f -> e and use e
-        float sc = 1.0f;
-        mvm[0] = sc*f[0];mvm[4] = sc*f[4];mvm[8] = sc*f[8];mvm[12] = f[12];
-        mvm[1] = sc*f[1];mvm[5] = sc*f[5];mvm[9] = sc*f[9];mvm[13] = f[13];
-        mvm[2] = sc*f[2];mvm[6] = sc*f[6];mvm[10] = sc*f[10];mvm[14] = f[14];
-        mvm[3] = f[3];mvm[7] = f[7];mvm[11] = f[11];mvm[15] = f[15];
+        // Two fingers rotate (z) unused
+        Matrix.rotateM(mvm, 0, mAngleZ, 0, 0, 1);
+
+        // Handle zoom
+        Matrix.scaleM(mvm, 0, scale, scale, scale);
     }
 
     // Initialize from model
     public void initBuffers(Model model) {
-        Log.e("ORISIM", "initBuffers.");
-
         nbPts = 0;
         for (Face f : model.faces) {
             for (int i = 2; i < f.points.size(); i++)
@@ -389,22 +435,16 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Called by system
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-        Log.e("ORISIM", "onSurfaceChanged.");
-
-        this.width = width;
-        this.height = height;
 
         // ViewPort
         GLES20.glViewport(0, 0, width, height);
 
         // Perspective, will not change, stored in mvp
         setPerspective(width, height);
-
     }
 
     // Called by system
     public void onDrawFrame(GL10 unused) {
-        Log.e("ORISIM", "onDrawFrame.");
 
         // Clear and use shader program
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -458,6 +498,8 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glVertexAttribPointer(hbt, 2, GLES20.GL_FLOAT, false, 0, backTex); // 2 uv, 4 bytes per uv
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, nbPts);
+
+        // Should we glDisableVertexAttribArray ?
 
     }
 }
