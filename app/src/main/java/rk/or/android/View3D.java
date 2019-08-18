@@ -7,6 +7,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -110,7 +111,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
                 mLastY = y;
                 activePointerId = ev.getPointerId(0);
                 // Hack to get onDoubleTap
-                if (mScaleDetector.getTimeDelta() < 200.0f) {
+                if (mScaleDetector.getTimeDelta() < 300.0f) {
                     mAngleX = mAngleY = mAngleZ = 0;
                     scale = 1.0f;
                     super.performClick();
@@ -329,7 +330,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         // Back texture coords "vec2 aTexCoord"
         backTex = ByteBuffer.allocateDirect(nbPts * 2 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
         // Vertex Line   "vec3 aVertexPosition" n * 3 coords * 4 bytes
-        lineVertex = ByteBuffer.allocateDirect((nbPts) * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        lineVertex = ByteBuffer.allocateDirect((nbPtsLines) * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
         // Put Faces
         for (Face f : model.faces) {
@@ -413,8 +414,8 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         for (Segment s : model.segments) {
             if (s.select) {
                 lineVertex.put(s.p1.x);
-                frontVertex.put(s.p1.y);
-                frontVertex.put(s.p1.z);
+                lineVertex.put(s.p1.y);
+                lineVertex.put(s.p1.z);
 
                 lineVertex.put(s.p2.x);
                 lineVertex.put(s.p2.y);
@@ -445,6 +446,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Called by system
     public void onDrawFrame(GL10 unused) {
+        Log.d("ORISIM","onDrawFrame");
 
         // Clear and use shader program
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -500,6 +502,13 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, nbPts);
 
         // Should we glDisableVertexAttribArray ?
+
+        // Calls commands.animationInProgress() to know if anim sould continue
+        if (mMainPane.commands.anim()){
+            Log.d("ORISIM","onDrawFrame animationInProgress:"+mMainPane.commands.anim());
+            needRebuild = true;
+            requestRender();
+        }
 
     }
 }

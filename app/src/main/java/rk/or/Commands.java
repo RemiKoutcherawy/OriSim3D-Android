@@ -1,5 +1,7 @@
 package rk.or;
 
+import android.util.Log;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -113,8 +115,8 @@ public class Commands {
       if (cde.equals("co")) {
         pauseDuration = System.currentTimeMillis() - pauseStart;
         // Continue animation
-//        mainPane.view3d.animate(this);
-        state = State.anim;
+          state = State.anim;
+          mainPane.view3d.requestRender();
       } else if (cde.equals("u")) {
       	// Undo one step
         state = State.undo;
@@ -173,22 +175,20 @@ public class Commands {
       while (iBefore < iReached) {
         done.addFirst(todo[iBefore++]);
       }
-      // Post an event to repaint
-      // The repaint will not occur till next animation, or end Cde
-//      mainPane.view3d.requestRender();
+      mainPane.view3d.requestRender();
     }
     // End of command line switch to idle
     if (state == State.run){
       state = State.idle;
     }
   }
-  /** Sets a flag in View3D to call anim() at each redraw */
+  /**  Tells View3D to requestRender() */
   public void animStart() {
       tstart = System.currentTimeMillis();
-      // Call View3D.animate() witch sets a flag animated=true and calls repaint()
-      // The flag animated=true if tested after each draw() and if true call anim()
-//      mainPane.view3d.animate(this);
+      // After each onDrawFrame() View3D calls anim() and if true calls requestRender()
       tpi = 0.0f;
+      // Launch animation
+      mainPane.view3d.requestRender();
   }
   /** Called from View3D at each redraw
    *  return true if anim should continue false if anim should end */
@@ -272,8 +272,7 @@ public class Commands {
     state = State.undo;
   	undoInProgress = true;
     // Launch animation to popUndo until iTok reached
-//    mainPane.view3d.animate(this);
-    return;
+    mainPane.view3d.requestRender();
   }
   /** Push undo */
   private void pushUndo() {
