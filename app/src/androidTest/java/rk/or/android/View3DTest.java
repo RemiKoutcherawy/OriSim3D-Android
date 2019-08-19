@@ -35,7 +35,7 @@ public class View3DTest {
         assertNotNull(view3d);
 
         view3d.onSurfaceCreated(null, null);
-        assertNotNull(view3d.width);
+        assertNotNull(view3d);
     }
 
 }

@@ -8,8 +8,10 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -43,6 +45,8 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static final int INVALID_POINTER_ID = -1;
     private int activePointerId = INVALID_POINTER_ID;
     private final ScaleGestureDetector mScaleDetector;
+    private final GestureDetector mDoubleTapDetector;
+    private boolean running;
 
     // Flag to rebuild buffers
     public static boolean needRebuild = true;
@@ -63,6 +67,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private FloatBuffer backNormal;
     private FloatBuffer frontTex;
     private FloatBuffer backTex;
+
     // Todo show lines
     int nbPtsLines;
     private FloatBuffer lineVertex;
@@ -80,9 +85,12 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // ScaleListener
-        this.mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
-        mScaleDetector.getTimeDelta();
-        // How to implement also GestureDetector.SimpleOnGestureListener ? to get onDoubleTap ?
+        mScaleDetector = new ScaleGestureDetector(context,  new ScaleListener());
+        // TapListener needed to build a GestureDetector with setOnDoubleTapListener()
+        TapListener tapListener = new TapListener();
+        mDoubleTapDetector = new GestureDetector( context, tapListener);
+        // DoubleTapListener
+        mDoubleTapDetector.setOnDoubleTapListener(new DoubleTapListener());
     }
 
     // ------ Touch event handling ------
@@ -97,25 +105,66 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
             return true;
         }
     }
+    // Not used, except to create a GestureDetector
+    private class TapListener implements GestureDetector.OnGestureListener {
+        @Override
+        public boolean onDown(MotionEvent e) { return false; }
+        @Override
+        public void onShowPress(MotionEvent e) { }
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) { return false; }
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float dx, float dy) { return false; }
+        @Override
+        public void onLongPress(MotionEvent e) {}
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) { return false; }
+    }
+
+    private class DoubleTapListener implements GestureDetector.OnDoubleTapListener{
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            Log.d("ORISIM","onSingleTapConfirmed");
+            if (running) {
+                // Simple tap, switch to pause, if running
+                mMainPane.commands.command("pa"); // Pause
+                Toast toast = Toast.makeText(mMainPane, "Paused. Tap to continue.", Toast.LENGTH_SHORT);
+                toast.show();
+            } else {
+                // Simple tap continue, if paused
+                mMainPane.commands.command("co"); // Continue
+                Toast toast = Toast.makeText(mMainPane, "Continue. Tap to pause.", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            running = !running;
+            return true;
+        }
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.d("ORISIM","onDoubleTap");
+            // Reset view angle and scale
+            mAngleX = mAngleY = mAngleZ = 0;
+            scale = 1.0f;
+            return true;
+        }
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) { return false; }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        // mScaleDetector manages Zoom
         mScaleDetector.onTouchEvent(ev);
+        // mDoubleTapDetector manages Tap, DoubleTap
+        mDoubleTapDetector.onTouchEvent(ev);
 
-        final int action = ev.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
+        // Manage Move
+        final int action = ev.getAction() & MotionEvent.ACTION_MASK;
+        switch (action ) {
             case MotionEvent.ACTION_DOWN: {
-                final float x = ev.getX();
-                final float y = ev.getY();
-                mLastX = x;
-                mLastY = y;
+                mLastX =  ev.getX();
+                mLastY = ev.getY();
                 activePointerId = ev.getPointerId(0);
-                // Hack to get onDoubleTap
-                if (mScaleDetector.getTimeDelta() < 300.0f) {
-                    mAngleX = mAngleY = mAngleZ = 0;
-                    scale = 1.0f;
-                    super.performClick();
-                }
                 break;
             }
 
@@ -251,7 +300,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         frontTex.recycle();
 
         // Create Back texture
-        Bitmap backTex = BitmapFactory.decodeResource(mMainPane.getResources(), R.drawable.sunako400x572, opts); // R.drawable.back
+        Bitmap backTex = BitmapFactory.decodeResource(mMainPane.getResources(), R.drawable.ville822x679, opts); // R.drawable.back
         wTexBack = backTex.getWidth();
         hTexBack = backTex.getHeight();
         // Bind to textureBack [1]
@@ -446,8 +495,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Called by system
     public void onDrawFrame(GL10 unused) {
-        Log.d("ORISIM","onDrawFrame");
-
         // Clear and use shader program
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glUseProgram(program);
@@ -501,11 +548,10 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, nbPts);
 
-        // Should we glDisableVertexAttribArray ?
+        // Should we call glDisableVertexAttribArray ?
 
-        // Calls commands.animationInProgress() to know if anim sould continue
+        // Calls commands.animationInProgress() to know if anim should continue
         if (mMainPane.commands.anim()){
-            Log.d("ORISIM","onDrawFrame animationInProgress:"+mMainPane.commands.anim());
             needRebuild = true;
             requestRender();
         }
