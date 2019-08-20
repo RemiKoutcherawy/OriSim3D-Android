@@ -46,7 +46,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private int activePointerId = INVALID_POINTER_ID;
     private final ScaleGestureDetector mScaleDetector;
     private final GestureDetector mDoubleTapDetector;
-    private boolean running;
+    private boolean running = true;
 
     // Flag to rebuild buffers
     public static boolean needRebuild = true;
@@ -67,8 +67,12 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private FloatBuffer backNormal;
     private FloatBuffer frontTex;
     private FloatBuffer backTex;
+    private FloatBuffer backgroundVertex, backgroundNormal, backgroundTex;
+//    private ShortBuffer backgroundIndex;
+//    final int[] buffers = new int[4];
 
-    int nbPtsLines;
+
+    private int nbPtsLines;
     private FloatBuffer lineVertex;
 
     // View3D shows and does Rendering
@@ -193,6 +197,8 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
                     mLastY = ev.getY(newPointerIndex);
                     activePointerId = ev.getPointerId(newPointerIndex);
                 }
+                // Get rid of inspection warning.
+                super.performClick();
                 break;
             }
         }
@@ -202,6 +208,9 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         return true;
     }
+    // Get rid of inspection warning.
+    @Override
+    public boolean performClick(){super.performClick(); return true;}
 
     // ------ GLES20 part ------
     // Called by system
@@ -270,8 +279,8 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Textures
     private void initTextures () {
-        textures = new int[2];
-        GLES20.glGenTextures(2, textures, 0);
+        textures = new int[3];
+        GLES20.glGenTextures(3, textures, 0);
 
         // Create Front texture
         BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -300,6 +309,17 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, backTex, 0);
         backTex.recycle();
+
+        // Create Background texture
+        Bitmap backgroundTex = BitmapFactory.decodeResource(mMainPane.getResources(), R.drawable.background256x256, opts);
+        // Bind to texture [2]
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[2]);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, backgroundTex, 0);
+        backgroundTex.recycle();
     }
 
     // Perspective
@@ -472,6 +492,56 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         needRebuild = false;
     }
 
+    // Initialize background
+    private void initBackground(){
+        // Background  (does not depend of number of points, no need to be done in init() )
+        // We have only 2 triangles => 6 points, for vertex, normal, texture
+        backgroundVertex = ByteBuffer.allocateDirect(6 * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        backgroundNormal = ByteBuffer.allocateDirect(6 * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        backgroundTex = ByteBuffer.allocateDirect(6 * 2 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        // Index Byte Buffer Background
+//        backgroundIndex = ByteBuffer.allocateDirect(6 * 2).order(ByteOrder.nativeOrder()).asShortBuffer();
+
+        // Background 2 triangles =  6 Vertex(3), 6 Normal(3)  6 Texture(2)
+        float[] vertices = {
+                -2000.0f, -2000.0f, -2000.0f,
+                2000.0f, 2000.0f, -2000.0f,
+                -2000.0f, 2000.0f, -2000.0f,
+
+                -2000.0f, -2000.0f, -2000.0f,
+                2000.0f, -2000.0f, -2000.0f,
+                2000.0f, 2000.0f, -2000.0f
+        };
+        float[] texCoords = {
+                0, 0,    5, 5,    0, 5,
+                0, 0,    5,  0,   5, 5
+        };
+        float[] normals = {
+                0, 0, 1,    0, 0, 1,    0, 0, 1,
+                0, 0, 1,    0, 0, 1,    0, 0, 1
+        };
+//        short[] index = {
+//                0,1,2,   3,4,5
+//        };
+        backgroundVertex.put(vertices).rewind();
+        backgroundNormal.put(normals).rewind();
+        backgroundTex.put(texCoords).rewind();
+//        backgroundIndex.put(index).rewind();
+
+        // Next time, use indexed buffers
+//        GLES20.glGenBuffers(4, buffers, 0);
+//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
+//        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, backgroundVertex.capacity() * 4, backgroundVertex, GLES20.GL_STATIC_DRAW);
+//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
+//        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, backgroundNormal.capacity() * 4, backgroundNormal, GLES20.GL_STATIC_DRAW);
+//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[2]);
+//        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, backgroundTex.capacity() * 4, backgroundTex, GLES20.GL_STATIC_DRAW);
+//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[3]);
+//        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, backgroundIndex.capacity() * 2, backgroundIndex, GLES20.GL_STATIC_DRAW);
+//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+//        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
     // Called by system
     public void onSurfaceChanged(GL10 unused, int width, int height) {
 
@@ -480,6 +550,9 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         // Perspective, will not change, stored in mvp
         setPerspective(width, height);
+
+        // Background, will not change
+        initBackground();
     }
 
     // Called by system
@@ -495,14 +568,36 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
             initBuffers(mMainPane.model);
         }
 
-        // Set ModelViewMatrix
-        setModelView();
-        int hmv = GLES20.glGetUniformLocation(program, "uModelViewMatrix");
-        GLES20.glUniformMatrix4fv(hmv, 1, false, mvm, 0);
-
         // Set projection matrix
         int hpm = GLES20.glGetUniformLocation(program, "uProjectionMatrix");
         GLES20.glUniformMatrix4fv(hpm, 1, false, mvp, 0);
+
+        // Set ModelViewMatrix to identity for background
+        Matrix.setIdentityM(mvm, 0);
+        int himv = GLES20.glGetUniformLocation(program, "uModelViewMatrix");
+        GLES20.glUniformMatrix4fv(himv, 1, false, mvm, 0);
+
+        // Background
+        int hbgv = GLES20.glGetAttribLocation(program, "aVertexPosition");
+        GLES20.glEnableVertexAttribArray(hbgv);
+        GLES20.glVertexAttribPointer(hbgv, 3, GLES20.GL_FLOAT, false, 0, backgroundVertex);
+        int hbgn = GLES20.glGetAttribLocation(program, "aVertexNormal");
+        GLES20.glEnableVertexAttribArray(hbgn);
+        GLES20.glVertexAttribPointer(hbgn, 3, GLES20.GL_FLOAT, false, 0, backgroundNormal);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[2]);
+        int hBgSampler = GLES20.glGetUniformLocation(program, "uSampler");
+        GLES20.glUniform1i(hBgSampler, 0);
+        int hbgt = GLES20.glGetAttribLocation(program, "aTexCoord");
+        GLES20.glEnableVertexAttribArray(hbgt);
+        GLES20.glVertexAttribPointer(hbgt, 2, GLES20.GL_FLOAT, false, 0, backgroundTex); // 2 uv, 4 bytes per uv
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 2 * 3);
+//        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 2 * 3, GLES20.GL_UNSIGNED_SHORT, 0); Next Time use indexed buffers
+
+        // Set ModelViewMatrix with rotation and scale
+        setModelView();
+        int hmv = GLES20.glGetUniformLocation(program, "uModelViewMatrix");
+        GLES20.glUniformMatrix4fv(hmv, 1, false, mvm, 0);
 
         // Front face
         int hfv = GLES20.glGetAttribLocation(program, "aVertexPosition");
