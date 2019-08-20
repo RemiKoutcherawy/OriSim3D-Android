@@ -245,11 +245,16 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         "    uniform sampler2D uSampler;\n" +
         "    varying highp vec2 vTexCoord;\n" +
         "    varying highp vec3 vLight;\n" +
-        "    void main(void) {\n" +
+        "    uniform vec4 uColor;"+
+        "    void main(void) { \n" +
         "      highp vec4 texelColor = texture2D(uSampler, vTexCoord);\n" +
         "      vec3 normal = texelColor.rgb * vLight;\n" +
         "      vec3 ambiant = texelColor.rgb * 0.5;\n" +
-        "      gl_FragColor = vec4(ambiant + normal, 1.0);\n" +
+        "       if (uColor.w == 1.0) { " +
+        "           gl_FragColor = uColor; " +
+        "       } else { " +
+        "           gl_FragColor = vec4(ambiant + normal, 1.0); " +
+        "       };\n" +
         "    }";
         int fgShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fgShader, fragmentShader);
@@ -363,6 +368,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         frontTex = ByteBuffer.allocateDirect(nbPts * 2 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
         // Back texture coords "vec2 aTexCoord"
         backTex = ByteBuffer.allocateDirect(nbPts * 2 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+
         // Vertex Line   "vec3 aVertexPosition" n * 3 coords * 4 bytes
         lineVertex = ByteBuffer.allocateDirect((nbPtsLines) * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
@@ -503,10 +509,10 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         // Front face
         int hfv = GLES20.glGetAttribLocation(program, "aVertexPosition");
         GLES20.glEnableVertexAttribArray(hfv);
-        GLES20.glVertexAttribPointer(hfv, 3, GLES20.GL_FLOAT, false, 0, frontVertex); // 3 points, 4 bytes per vertex
+        GLES20.glVertexAttribPointer(hfv, 3, GLES20.GL_FLOAT, false, 0, frontVertex); // 3 coords, 4 bytes per vertex
         int hfn = GLES20.glGetAttribLocation(program, "aVertexNormal");
         GLES20.glEnableVertexAttribArray(hfn);
-        GLES20.glVertexAttribPointer(hfn, 3, GLES20.GL_FLOAT, false, 0, frontNormal); // 3 points, 4 bytes per vertex
+        GLES20.glVertexAttribPointer(hfn, 3, GLES20.GL_FLOAT, false, 0, frontNormal); // 3 coords, 4 bytes per vertex
         // Front texture
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
         int hSampler = GLES20.glGetUniformLocation(program, "uSampler");
@@ -521,10 +527,10 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         // Same handle with Back Vertex
         int hbv = GLES20.glGetAttribLocation(program, "aVertexPosition");
         GLES20.glEnableVertexAttribArray(hbv);
-        GLES20.glVertexAttribPointer(hbv, 3, GLES20.GL_FLOAT, false, 0, backVertex); // 3 points, 4 bytes per vertex
+        GLES20.glVertexAttribPointer(hbv, 3, GLES20.GL_FLOAT, false, 0, backVertex); // 3 coords, 4 bytes per vertex
         int hbn = GLES20.glGetAttribLocation(program, "aVertexNormal");
         GLES20.glEnableVertexAttribArray(hbn);
-        GLES20.glVertexAttribPointer(hbn, 3, GLES20.GL_FLOAT, false, 0, backNormal); // 3 points, 4 bytes per vertex
+        GLES20.glVertexAttribPointer(hbn, 3, GLES20.GL_FLOAT, false, 0, backNormal); // 3 coords, 4 bytes per vertex
         // Back texture, same Sampler, back textcoord
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[1]);
         int hbt = GLES20.glGetAttribLocation(program, "aTexCoord");
@@ -533,7 +539,22 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, nbPts);
 
-        // Should we call glDisableVertexAttribArray ?
+        // Lines
+        // Same Shader GLES20.GL_LINES instead of GLES20.GL_TRIANGLES
+        GLES20.glLineWidth(10.0f);
+        int hlv = GLES20.glGetAttribLocation(program, "aVertexPosition");
+        GLES20.glEnableVertexAttribArray(hlv);
+        GLES20.glVertexAttribPointer(hlv, 3, GLES20.GL_FLOAT, true, 0, lineVertex); // 3 coords, 4 bytes per vertex
+        // Color Hack to tell the fragment shader to use uColor (w = 1)
+        int hlc = GLES20.glGetUniformLocation(program, "uColor");
+        GLES20.glUniform4f(hlc, 0.0f,0.0f,0.0f,1.0f);
+
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, nbPtsLines);
+
+        // Hack to tell the fragment shader not to use uColor (w = 0)
+        GLES20.glUniform4f(hlc, 0.0f,0.0f,0.0f,0.0f);
+
+        // Should I call glDisableVertexAttribArray ?
 
         // Calls commands.animationInProgress() to know if anim should continue
         if (mMainPane.commands.anim()){
