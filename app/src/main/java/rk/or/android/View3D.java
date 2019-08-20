@@ -86,9 +86,9 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         // ScaleListener
         mScaleDetector = new ScaleGestureDetector(context,  new ScaleListener());
-        // TapListener needed to build a GestureDetector with setOnDoubleTapListener()
-        TapListener tapListener = new TapListener();
-        mDoubleTapDetector = new GestureDetector( context, tapListener);
+        // SimpleOnGestureListener needed to build a GestureDetector with setOnDoubleTapListener()
+        GestureDetector.SimpleOnGestureListener dummy = new GestureDetector.SimpleOnGestureListener();
+        mDoubleTapDetector = new GestureDetector( context, dummy);
         // DoubleTapListener
         mDoubleTapDetector.setOnDoubleTapListener(new DoubleTapListener());
     }
@@ -105,21 +105,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
             return true;
         }
     }
-    // Not used, except to create a GestureDetector
-    private class TapListener implements GestureDetector.OnGestureListener {
-        @Override
-        public boolean onDown(MotionEvent e) { return false; }
-        @Override
-        public void onShowPress(MotionEvent e) { }
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) { return false; }
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float dx, float dy) { return false; }
-        @Override
-        public void onLongPress(MotionEvent e) {}
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) { return false; }
-    }
 
     private class DoubleTapListener implements GestureDetector.OnDoubleTapListener{
         @Override
@@ -128,12 +113,12 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
             if (running) {
                 // Simple tap, switch to pause, if running
                 mMainPane.commands.command("pa"); // Pause
-                Toast toast = Toast.makeText(mMainPane, "Paused. Tap to continue.", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(mMainPane, "Pause", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 // Simple tap continue, if paused
                 mMainPane.commands.command("co"); // Continue
-                Toast toast = Toast.makeText(mMainPane, "Continue. Tap to pause.", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(mMainPane, "Continue", Toast.LENGTH_SHORT);
                 toast.show();
             }
             running = !running;
