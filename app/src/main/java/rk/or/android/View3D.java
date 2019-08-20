@@ -68,7 +68,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private FloatBuffer frontTex;
     private FloatBuffer backTex;
 
-    // Todo show lines
     int nbPtsLines;
     private FloatBuffer lineVertex;
 
@@ -450,7 +449,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         }
 
         // Put segments in the same vertex buffer, only index is different
-        // TODO draw lines
         for (Segment s : model.segments) {
             if (s.select) {
                 lineVertex.put(s.p1.x);
