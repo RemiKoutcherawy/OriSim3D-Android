@@ -7,7 +7,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -112,7 +111,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private class DoubleTapListener implements GestureDetector.OnDoubleTapListener{
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.d("ORISIM","onSingleTapConfirmed");
             if (running) {
                 // Simple tap, switch to pause, if running
                 mMainPane.commands.command("pa"); // Pause
@@ -129,7 +127,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         }
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            Log.d("ORISIM","onDoubleTap");
             // Reset view angle and scale
             mAngleX = mAngleY = mAngleZ = 0;
             scale = 1.0f;
