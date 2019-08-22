@@ -295,7 +295,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         frontTex.recycle();
 
         // Create Back texture
-        Bitmap backTex = BitmapFactory.decodeResource(mMainPane.getResources(), R.drawable.ville822x679, opts); // R.drawable.back
+        Bitmap backTex = BitmapFactory.decodeResource(mMainPane.getResources(), R.drawable.ville400x565, opts); // R.drawable.back
         wTexBack = backTex.getWidth();
         hTexBack = backTex.getHeight();
         // Bind to textureBack [1]
