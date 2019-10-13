@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -27,8 +28,12 @@ import rk.or.Model;
 import rk.or.Point;
 import rk.or.Segment;
 
+import static rk.or.android.Check.checkCompile;
+import static rk.or.android.Check.checkError;
+import static rk.or.android.Check.checkLink;
+
 // View 3D with Touch handler to rotate zoom
-public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
+public class View3D_check extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Mouse Rotation
     private float mAngleX = 0, mAngleY = 0, mAngleZ = 0;
@@ -78,12 +83,14 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private FloatBuffer lineVertex;
 
     // View3D shows and does Rendering
-    public View3D(Context context) {
+    public View3D_check(Context context) {
         super(context);
+        Log.d("ORISIM", "View3D");
         init(context);
     }
-    public View3D(Context context, AttributeSet attrs) {
+    public View3D_check(Context context, AttributeSet attrs) {
         super(context, attrs);
+        Log.d("ORISIM", "View3D attrs:"+attrs);
         init(context);
     }
     private void init(Context context) {
@@ -121,12 +128,12 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (running) {
                 // Simple tap, switch to pause, if running
-                View3D.this.commands.command("pa"); // Pause
+                View3D_check.this.commands.command("pa"); // Pause
                 Toast toast = Toast.makeText(getContext(), "Pause", Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 // Simple tap continue, if paused
-                View3D.this.commands.command("co"); // Continue
+                View3D_check.this.commands.command("co"); // Continue
                 Toast toast = Toast.makeText(getContext(), "Continue", Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -234,7 +241,9 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     }
 
     // Shaders
-    private void initShaders() {
+    private void initShaders () {
+        Log.e("ORISIM", "initShaders.");
+
         // Initialize Shaders
         String vertexShader =
         "    attribute vec4 aVertexPosition;\n" +
@@ -255,6 +264,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         int vxShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         GLES20.glShaderSource(vxShader, vertexShader);
         GLES20.glCompileShader(vxShader);
+        checkCompile(vxShader);
 
         String fragmentShader =
         "    precision highp float;\n" +
@@ -275,6 +285,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         int fgShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         GLES20.glShaderSource(fgShader, fragmentShader);
         GLES20.glCompileShader(fgShader);
+        checkCompile(fgShader);
 
         // Create OpenGL ES Program
         program = GLES20.glCreateProgram();
@@ -283,10 +294,13 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         // Create OpenGL ES program executables
         GLES20.glLinkProgram(program);
+        checkLink(program);
     }
 
     // Textures
     private void initTextures () {
+        Log.e("ORISIM", "initTextures.");
+
         textures = new int[3];
         GLES20.glGenTextures(3, textures, 0);
 
@@ -304,6 +318,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, frontTex, 0);
         frontTex.recycle();
+        checkError();
 
         // Create Back texture
         Bitmap backTex = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ville400x565, opts); // R.drawable.back
@@ -317,6 +332,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, backTex, 0);
         backTex.recycle();
+        checkError();
 
         // Create Background texture
         Bitmap backgroundTex = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.background256x256, opts);
@@ -328,10 +344,13 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, backgroundTex, 0);
         backgroundTex.recycle();
+        checkError();
     }
 
     // Perspective
     private void setPerspective(int width, int height) {
+        Log.e("ORISIM", "setPerspective.");
+
         // Choose portrait or landscape
         float ratio = (float) width / (float) height;
         float fov = 40;
@@ -357,6 +376,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Model view, rotation, and scale
     private void setModelView() {
+        Log.e("ORISIM", "setModelView.");
 
         // One finger rotates the object
         Matrix.setIdentityM(mvm, 0);
@@ -552,6 +572,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Called by system
     public void onSurfaceChanged(GL10 unused, int width, int height) {
+        Log.e("ORISIM", "onSurfaceChanged.");
 
         // ViewPort
         GLES20.glViewport(0, 0, width, height);
@@ -565,6 +586,8 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     // Called by system
     public void onDrawFrame(GL10 unused) {
+        Log.d("ORISIM", "onDrawFrame Model:"+(model !=null)+" needRebuild:"+(needRebuild)+" commands:"+commands);
+
         // Clear and use shader program
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glUseProgram(program);
@@ -611,9 +634,11 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         int hfv = GLES20.glGetAttribLocation(program, "aVertexPosition");
         GLES20.glEnableVertexAttribArray(hfv);
         GLES20.glVertexAttribPointer(hfv, 3, GLES20.GL_FLOAT, false, 0, frontVertex); // 3 coords, 4 bytes per vertex
+        checkError();
         int hfn = GLES20.glGetAttribLocation(program, "aVertexNormal");
         GLES20.glEnableVertexAttribArray(hfn);
         GLES20.glVertexAttribPointer(hfn, 3, GLES20.GL_FLOAT, false, 0, frontNormal); // 3 coords, 4 bytes per vertex
+        checkError();
         // Front texture
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
         int hSampler = GLES20.glGetUniformLocation(program, "uSampler");
@@ -621,6 +646,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         int hft = GLES20.glGetAttribLocation(program, "aTexCoord");
         GLES20.glEnableVertexAttribArray(hft);
         GLES20.glVertexAttribPointer(hft, 2, GLES20.GL_FLOAT, false, 0, frontTex); // 2 uv, 4 bytes per uv
+        checkError();
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, nbPts);
 
@@ -629,14 +655,17 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         int hbv = GLES20.glGetAttribLocation(program, "aVertexPosition");
         GLES20.glEnableVertexAttribArray(hbv);
         GLES20.glVertexAttribPointer(hbv, 3, GLES20.GL_FLOAT, false, 0, backVertex); // 3 coords, 4 bytes per vertex
+        checkError();
         int hbn = GLES20.glGetAttribLocation(program, "aVertexNormal");
         GLES20.glEnableVertexAttribArray(hbn);
         GLES20.glVertexAttribPointer(hbn, 3, GLES20.GL_FLOAT, false, 0, backNormal); // 3 coords, 4 bytes per vertex
+        checkError();
         // Back texture, same Sampler, back textcoord
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[1]);
         int hbt = GLES20.glGetAttribLocation(program, "aTexCoord");
         GLES20.glEnableVertexAttribArray(hbt);
         GLES20.glVertexAttribPointer(hbt, 2, GLES20.GL_FLOAT, false, 0, backTex); // 2 uv, 4 bytes per uv
+        checkError();
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, nbPts);
 
@@ -656,11 +685,61 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
         GLES20.glUniform4f(hlc, 0.0f, 0.0f, 0.0f, 0.0f);
 
         // Should I call glDisableVertexAttribArray ?
+        GLES20.glDisableVertexAttribArray(hfv);
+        GLES20.glDisableVertexAttribArray(hbv);
+        GLES20.glDisableVertexAttribArray(hfn);
+        GLES20.glDisableVertexAttribArray(hbn);
+        GLES20.glDisableVertexAttribArray(hft);
+        GLES20.glDisableVertexAttribArray(hbt);
 
+//        // Triangle
+//        float[] triangleCoords = new float[]{
+//                -200.0f,  200.0f, 0.0f, // top
+//                -200.0f, -200.0f, 0.0f, // bottom left
+//                200.0f, -200.0f, 0.0f   // bottom right
+//        };
+//        float[] triangleNormal = new float[]{
+//                0.0f, 0.0f, 1.0f,
+//                0.0f, 0.0f, 1.0f,
+//                0.0f, 0.0f, 1.0f
+//        };
+//        float[] triangleTexture = new float[]{
+//                0, 1,
+//                0, 0,
+//                1, 0
+//        };
+//        // Vertex
+//        FloatBuffer verPos = ByteBuffer.allocateDirect(triangleCoords.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+//        verPos.put(triangleCoords); verPos.rewind();
+//        int hVerPos = GLES20.glGetAttribLocation(program, "aVertexPosition");
+//        GLES20.glEnableVertexAttribArray(hVerPos);
+//        GLES20.glVertexAttribPointer(hVerPos, 3, GLES20.GL_FLOAT, false, 0, verPos); // 3 points, 4 bytes per vertex
+//        // Normal
+//        FloatBuffer verNorm = ByteBuffer.allocateDirect(triangleCoords.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+//        verNorm.put(triangleNormal); verNorm.rewind();
+//        int hVerNorm = GLES20.glGetAttribLocation(program, "aVertexNormal");
+//        GLES20.glEnableVertexAttribArray(hVerNorm);
+//        GLES20.glVertexAttribPointer(hVerNorm, 3, GLES20.GL_FLOAT, false, 0, verNorm); // 3 points, 4 bytes per vertex
+//        // Texture
+//        FloatBuffer frontTex = ByteBuffer.allocateDirect(triangleCoords.length * 2 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+//        frontTex.put(triangleTexture); frontTex.rewind();
+//        int hFrontTexture = GLES20.glGetAttribLocation(program, "aTexCoord");
+//        GLES20.glEnableVertexAttribArray(hFrontTexture);
+//        GLES20.glVertexAttribPointer(hFrontTexture, 2, GLES20.GL_FLOAT, false, 0, frontTex); // 2 uv, 4 bytes per uv
+//        // Draw triangle
+//        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+//        // Disable
+//        GLES20.glDisableVertexAttribArray(hVerPos);
+//        GLES20.glDisableVertexAttribArray(hVerNorm);
+//        GLES20.glDisableVertexAttribArray(hFrontTexture);
         // Call commands.animationInProgress() to know if anim should continue
         if (commands.anim()) {
             needRebuild = true;
             requestRender();
         }
     }
+
+//        CharSequence text = "Hello :" + e.getAction();
+//        Toast toast = Toast.makeText(mMainPane, text, Toast.LENGTH_SHORT);
+//        toast.show();
 }

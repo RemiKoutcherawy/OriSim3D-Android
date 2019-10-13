@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <rk.or.android.View3D
+        android:id="@+id/view3d"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageButton
+        android:id="@+id/ArrowUp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:src="@android:drawable/arrow_up_float"
+        android:contentDescription="@string/ArrowUp" />
+
+    <LinearLayout
+        android:id="@+id/BottomMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/ArrowDown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:src="@android:drawable/arrow_down_float"
+            android:contentDescription="@string/ArrowDown" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/Cocotte"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:contentDescription="@string/cocotte"
+                android:src="@drawable/cocotte72x72" />
+
+            <ImageView
+                android:id="@+id/Austria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/austria"
+                android:src="@drawable/austria72x72" />
+
+            <ImageView
+                android:id="@+id/Boat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/boat"
+                android:src="@drawable/boat72x72" />
+
+            <ImageView
+                android:id="@+id/Duck"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/duck"
+                android:src="@drawable/duck72x72" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

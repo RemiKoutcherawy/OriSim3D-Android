@@ -13,6 +13,7 @@ class Check {
             Log.e("ORISIM", "Error : " + GLES20.glGetShaderInfoLog(shader), t);
         }
     }
+
     public static void checkLink(int program) {
         int[] linked = new int[1];
         GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linked, 0);
@@ -21,6 +22,7 @@ class Check {
             Log.e("ORISIM", "Error : " + GLES20.glGetProgramInfoLog(program), t);
         }
     }
+
     public static void checkError() {
         // GL_INVALID_OPERATION = 0x0502
         // GL_INVALID_VALUE = 0x0501;

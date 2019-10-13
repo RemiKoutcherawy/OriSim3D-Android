@@ -1,3 +1,8 @@
 <resources>
-    <string name="OriSim3D">OriSim3D</string>
+    <string name="cocotte">Cocotte</string>
+    <string name="austria">Austria</string>
+    <string name="boat">Boat</string>
+    <string name="duck">Duck</string>
+    <string name="ArrowDown">ArrowDown</string>
+    <string name="ArrowUp">ArrowUp</string>
 </resources>
