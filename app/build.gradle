@@ -9,11 +9,10 @@ android {
             storeFile file('../../../.android/debug.keystore')
         }
     }
-    compileSdkVersion 34
 
     defaultConfig {
         applicationId "rk.or.android"
-        minSdkVersion 23
+        minSdkVersion 34
         targetSdkVersion 34
         versionCode 6
         versionName "OriSim3D"
@@ -40,6 +39,7 @@ android {
         targetCompatibility = '1.8'
     }
     namespace 'rk.or.android'
+    compileSdk 34
 }
 
 dependencies {
