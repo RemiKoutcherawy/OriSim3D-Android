@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
-        tools:targetApi="s">
+        >
 
         <activity android:name="rk.or.android.MainActivity"
             android:exported="true">
