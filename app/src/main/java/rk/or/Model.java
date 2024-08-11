@@ -1,5 +1,4 @@
 package rk.or;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.io.Serializable;
@@ -255,7 +254,7 @@ public class Model implements Serializable {
      */
     private void splitFacesByPlane(Plane pl, List<Face> list) {
         // All potential faces
-        list = list == null ? faces : list.size() == 0 ? faces : list;
+        list = list == null ? faces : list.isEmpty() ? faces : list;
         List<Face> listToSplit = new LinkedList<Face>();
         for (Face f : list) {
             for (int i = 0; i < f.points.size() - 1; i++) {
@@ -276,7 +275,7 @@ public class Model implements Serializable {
      * Rotate around axis Segment with angle list of Points
      */
     public void rotate(Segment s, float angle, List<Point> list) {
-        angle *= Math.PI / 180.0;
+        angle *= (float) (Math.PI / 180.0);
         float ax = s.p1.x, ay = s.p1.y, az = s.p1.z;
         float nx = s.p2.x - ax, ny = s.p2.y - ay, nz = s.p2.z - az;
         float n = (float) (1.0 / Math.sqrt(nx * nx + ny * ny + nz * nz));
@@ -300,7 +299,7 @@ public class Model implements Serializable {
      * Turn model around 1:X axis 2:Y axis 3:Z axis
      */
     public void turn(float angle, int axe) {
-        angle *= Math.PI / 180.0;
+        angle *= (float) (Math.PI / 180.0);
         float ax = 0, ay = 0, az = 0;
         float nx = 0.0f, ny = 0.0f, nz = 0.0f;
         if (axe == 1) nx = 1.0f;

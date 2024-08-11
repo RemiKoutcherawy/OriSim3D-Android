@@ -28,9 +28,9 @@ public class Commands {
     public enum State {idle, run, anim, pause, undo}
     public State state = State.idle;
     // Serialized model to undo
-    private LinkedList<byte[]> undo;
+    private final LinkedList<byte[]> undo;
     // Done Commands
-    private LinkedList<String> done;
+    private final LinkedList<String> done;
     private boolean undoInProgress = false;
     // Folding command and index in command[] and no scanned
     private String[] todo;
@@ -613,7 +613,7 @@ public class Commands {
      */
     private String[] tokenize(String input) {
         ArrayList<String> matchList = new ArrayList<String>();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         boolean lineComment = false;
 
         for (int i = 0; i < input.length(); i++) {
@@ -674,7 +674,7 @@ public class Commands {
     private String read(String name) {
         URL fileURL = Commands.class.getResource("/rk/or/raw/" + name);
         InputStream input;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try {
             // If the file is not in the jar, get it strait
             if (fileURL == null)

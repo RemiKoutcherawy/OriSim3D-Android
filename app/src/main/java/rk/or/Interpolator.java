@@ -77,7 +77,7 @@ class GravityBounceInterpolator implements Interpolator {
         else if (t < 0.62f)
             x = (((-16.696f * t) + 21.298f) * t - 6.390f) * t + 0.909f;
         else if (t < 0.885f)
-            x = (((31.973f * t) - 74.528f) * t + 56.497f) * t + -12.844f;
+            x = (((31.973f * t) - 74.528f) * t + 56.497f) * t -12.844f;
         else if (t < 1.0f)
             x = (((-37.807f * t) + 114.745f) * t - 114.938f) * t + 39.000f;
         else x = (((-7278.029f * t) + 22213.034f) * t - 22589.244f) * t + 7655.239f;
