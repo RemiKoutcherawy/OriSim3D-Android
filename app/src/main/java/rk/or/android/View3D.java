@@ -13,6 +13,8 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -70,9 +72,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
     private FloatBuffer frontTex;
     private FloatBuffer backTex;
     private FloatBuffer backgroundVertex, backgroundNormal, backgroundTex;
-//    private ShortBuffer backgroundIndex;
-//    final int[] buffers = new int[4];
-
 
     private int nbPtsLines;
     private FloatBuffer lineVertex;
@@ -118,7 +117,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     private class DoubleTapListener implements GestureDetector.OnDoubleTapListener{
         @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
+        public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
             if (running) {
                 // Simple tap, switch to pause, if running
                 View3D.this.commands.command("pa"); // Pause
@@ -134,14 +133,14 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
             return true;
         }
         @Override
-        public boolean onDoubleTap(MotionEvent e) {
+        public boolean onDoubleTap(@NonNull MotionEvent e) {
             // Reset view angle and scale
             mAngleX = mAngleY = mAngleZ = 0;
             scale = 1.0f;
             return true;
         }
         @Override
-        public boolean onDoubleTapEvent(MotionEvent e) { return false; }
+        public boolean onDoubleTapEvent(@NonNull MotionEvent e) { return false; }
     }
 
     @Override
@@ -180,10 +179,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
                 break;
             }
 
-            case MotionEvent.ACTION_UP: {
-                activePointerId = INVALID_POINTER_ID;
-                break;
-            }
+            case MotionEvent.ACTION_UP:
 
             case MotionEvent.ACTION_CANCEL: {
                 activePointerId = INVALID_POINTER_ID;
@@ -229,8 +225,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
 
         initShaders();
         initTextures();
-        // setPerspective(width, height); // Will be called by onSurfaceChanged
-        // initBuffers(); // Will be called by onDrawFrame, when needed
     }
 
     // Shaders
@@ -528,9 +522,6 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
                 0, 0, 1,    0, 0, 1,    0, 0, 1,
                 0, 0, 1,    0, 0, 1,    0, 0, 1
         };
-//        short[] index = {
-//                0,1,2,   3,4,5
-//        };
         backgroundVertex.put(vertices).rewind();
         backgroundNormal.put(normals).rewind();
         backgroundTex.put(texCoords).rewind();

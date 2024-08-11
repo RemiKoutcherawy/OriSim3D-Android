@@ -14,7 +14,7 @@ android {
         applicationId "rk.or.android"
         minSdkVersion 34
         targetSdkVersion 34
-        versionCode 6
+        versionCode 7
         versionName "OriSim3D"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.annotation:annotation-jvm:1.8.2'
     testImplementation 'junit:junit:4.13.2'
 
     // Core library

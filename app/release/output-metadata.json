@@ -11,7 +11,7 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 6,
+      "versionCode": 7,
       "versionName": "OriSim3D",
       "outputFile": "app-release.apk"
     }

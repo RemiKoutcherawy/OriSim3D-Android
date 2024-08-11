@@ -3,3 +3,32 @@ View3D.back = R.drawable.blue32x32;
 View3D.back = R.drawable.sunako400x572;
 hulk400x566.jpg
 ville822x679.jpg
+
+Bump to Gradle 8.2.0
+See
+1/ .idea/gradle.xml
+<option name="gradleJvm" value="jbr-17" />
+<option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+versionCode 7
+Warnings in View3D.java
+import androidx.annotation.NonNull;
+2/ gradle.properties
+android.enableJetifier=false
+android.nonTransitiveRClass=true
+
+androidx.test.rule
+@Deprecated
+public class ActivityTestRule<T extends android.app.Activity>
+implements org.junit.rules.TestRule
+This rule provides functional testing of a single Activity. When launchActivity is set to true in the constructor, the Activity under test will be launched before each test annotated with Test and before methods annotated with Before, and it will be terminated after the test is completed and methods annotated with After are finished.
+The Activity can be manually launched with launchActivity(Intent), and manually finished with finishActivity(). If the Activity is running at the end of the test, the test rule will finish it.
+During the duration of the test you will be able to manipulate your Activity directly using the reference obtained from getActivity(). If the Activity is finished and relaunched, the reference returned by getActivity() will always point to the current instance of the Activity.
+Deprecated
+use androidx.test.core.app.ActivityScenario or androidx.test.ext.junit.rules.ActivityScenarioRule instead. They offer a simpler, and safer way of controlling Activity lifecycles.
+Here are some tips to consider when converting to ActivityScenario/Rule:
+For simple cases where you want to launch the Activity before each test and tear it down after each test (eg you are using ActivityTestRule(Class)), convert directly to ActivityScenarioRule.
+If you need control over when to launch the Activity (eg you are using ActivityTestRule(Class, false, false)), use ActivityScenario.launch. It's recommended to wrap the launch in a try-block, so the Activity is closed automatically. try (ActivityScenario.launch(activityClass)) { ... }
+If you need access to the Activity during the test (eg you are calling getActivity()) provide a Runnable callback to androidx.test.core.app.ActivityScenario.onActivity(Runnable) instead. The callback provided to onActivity will run on the application's main thread, thus ensuring a safer mechanism to access the Activity.
+Type parameters:
+<T> – The Activity class under test
+  Gradle: androidx.test:rules:1.5.0@aar (classes.jar)
