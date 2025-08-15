@@ -1,6 +1,6 @@
 d -200 200 -200 -200 200 -200 200 200 
 // Diagonale
-b 0 2 od -1 igb 
+b 0 2 od -1 il
 t 1000 f 4 180 3) mo 1 3
 // Marque coin bas droit
 c 1 2 od -1 seg 7

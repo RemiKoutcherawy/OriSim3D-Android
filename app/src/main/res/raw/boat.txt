@@ -3,7 +3,7 @@ io t 2000 zf)
 // plie le haut sur le bas
 c 0 1 od -1 igb
 t 2000 f 6 180 0 3)
-iao t 1000 zf) igb 
+il t 1000 zf) il
 // plie les bords à 45 
 c 0 3 
 seg 9
