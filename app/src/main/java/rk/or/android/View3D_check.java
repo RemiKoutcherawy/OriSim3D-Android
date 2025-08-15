@@ -75,13 +75,8 @@ public class View3D_check extends GLSurfaceView implements GLSurfaceView.Rendere
     private FloatBuffer frontTex;
     private FloatBuffer backTex;
     private FloatBuffer backgroundVertex, backgroundNormal, backgroundTex;
-//    private ShortBuffer backgroundIndex;
-//    final int[] buffers = new int[4];
-
-
     private int nbPtsLines;
     private FloatBuffer lineVertex;
-
     // View3D shows and does Rendering
     public View3D_check(Context context) {
         super(context);
@@ -187,10 +182,7 @@ public class View3D_check extends GLSurfaceView implements GLSurfaceView.Rendere
                 break;
             }
 
-            case MotionEvent.ACTION_UP: {
-                activePointerId = INVALID_POINTER_ID;
-                break;
-            }
+            case MotionEvent.ACTION_UP:
 
             case MotionEvent.ACTION_CANCEL: {
                 activePointerId = INVALID_POINTER_ID;
@@ -233,11 +225,8 @@ public class View3D_check extends GLSurfaceView implements GLSurfaceView.Rendere
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glClearColor(0.68f, 0.8f, 1f, 1); // blue
-
         initShaders();
         initTextures();
-        // setPerspective(width, height); // Will be called by onSurfaceChanged
-        // initBuffers(); // Will be called by onDrawFrame, when needed
     }
 
     // Shaders
@@ -548,26 +537,9 @@ public class View3D_check extends GLSurfaceView implements GLSurfaceView.Rendere
                 0, 0, 1,    0, 0, 1,    0, 0, 1,
                 0, 0, 1,    0, 0, 1,    0, 0, 1
         };
-//        short[] index = {
-//                0,1,2,   3,4,5
-//        };
         backgroundVertex.put(vertices).rewind();
         backgroundNormal.put(normals).rewind();
         backgroundTex.put(texCoords).rewind();
-//        backgroundIndex.put(index).rewind();
-
-        // Next time, use indexed buffers
-//        GLES20.glGenBuffers(4, buffers, 0);
-//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
-//        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, backgroundVertex.capacity() * 4, backgroundVertex, GLES20.GL_STATIC_DRAW);
-//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
-//        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, backgroundNormal.capacity() * 4, backgroundNormal, GLES20.GL_STATIC_DRAW);
-//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[2]);
-//        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, backgroundTex.capacity() * 4, backgroundTex, GLES20.GL_STATIC_DRAW);
-//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[3]);
-//        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, backgroundIndex.capacity() * 2, backgroundIndex, GLES20.GL_STATIC_DRAW);
-//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-//        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     // Called by system

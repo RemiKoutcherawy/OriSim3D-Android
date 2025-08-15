@@ -7,12 +7,14 @@ import java.io.Serializable;
  * Two points p1 p2
  */
 public class Segment implements Comparable<Segment>, Serializable {
-    public static final int PLAIN = 0, EDGE = 1, MOUNTAIN = 2, VALLEY = 3, TEMPORARY = -1;
+    public static final int PLAIN = 0;
+    public static final int EDGE = 1;
+    public static final int TEMPORARY = -1;
     private static final long serialVersionUID = 1L;
     private static final double EPSILON = 0.1;
     public Point p1, p2;
     public int id, type;
-    public boolean select, highlight;
+    public boolean select;
     public float lg2d, lg3d, angle;
 
     /**
@@ -94,10 +96,9 @@ public class Segment implements Comparable<Segment>, Serializable {
     /**
      * 2D Length in flat view
      */
-    public float lg2d() {
+    public void lg2d() {
         lg2d = (float) Math.sqrt((p1.xf - p2.xf) * (p1.xf - p2.xf)
                 + (p1.yf - p2.yf) * (p1.yf - p2.yf));
-        return lg2d;
     }
 
     /**

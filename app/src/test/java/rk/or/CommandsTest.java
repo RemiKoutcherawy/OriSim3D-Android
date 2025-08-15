@@ -12,7 +12,7 @@ public class CommandsTest {
         Model model = new Model();
         model.init(-200, -200, 200, -200, 200, 200, -200, 200);
         assertNotNull(model);
-        Commands c = new Commands(null, model, null);
+        Commands c = new Commands();
         assertNotNull(c);
     }
 }

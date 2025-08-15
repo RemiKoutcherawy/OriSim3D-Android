@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
         view3d.model = model;
 
         // Commands
-        Commands commands = new Commands(this, model, view3d);
+        Commands commands = new Commands();
         commands.model = model;
         commands.view3d = view3d;
         view3d.commands = commands;

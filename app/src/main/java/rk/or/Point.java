@@ -12,9 +12,8 @@ public class Point implements Comparable<Point>, Serializable {
     private static final long serialVersionUID = 1L;
     public float xf, yf; // x y Flat, in unfolded state
     public float x, y, z; // x y z 3D
-    public int xv, yv; // x y z 3D projected in 2D
-    public int id, type;
-    public boolean select, highlight, fixed;
+    public int id;
+    public boolean select;
 
     /**
      * Constructs a point
@@ -158,6 +157,4 @@ public class Point implements Comparable<Point>, Serializable {
             return d;
         return 0;
     }
-
-
 }

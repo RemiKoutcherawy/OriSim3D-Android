@@ -22,9 +22,9 @@ public class Model implements Serializable {
      * Constructs zero length arrays for points, faces, segments
      */
     public Model() {
-        points = new LinkedList<Point>();
-        faces = new LinkedList<Face>();
-        segments = new LinkedList<Segment>();
+        points = new LinkedList<>();
+        faces = new LinkedList<>();
+        segments = new LinkedList<>();
         idPoint = idSegment = idFace = 0;
     }
 
@@ -85,10 +85,9 @@ public class Model implements Serializable {
     /**
      * Adds a segment to this model
      */
-    private Segment addSegment(Point p1, Point p2, int type) {
+    private void addSegment(Point p1, Point p2, int type) {
         Segment s = new Segment().setFrom2PointsTypeId(p1, p2, type, idSegment++);
         segments.add(s);
-        return s;
     }
 
     /**
@@ -255,7 +254,7 @@ public class Model implements Serializable {
     private void splitFacesByPlane(Plane pl, List<Face> list) {
         // All potential faces
         list = list == null ? faces : list.isEmpty() ? faces : list;
-        List<Face> listToSplit = new LinkedList<Face>();
+        List<Face> listToSplit = new LinkedList<>();
         for (Face f : list) {
             for (int i = 0; i < f.points.size() - 1; i++) {
                 if (pl.intersect(f.points.get(i), f.points.get(i + 1)) != null
@@ -325,31 +324,29 @@ public class Model implements Serializable {
     /**
      * Adjust list of Points
      */
-    public float adjust(List<Point> list) {
-        float dmax = 100;
-        for (int i = 0; dmax > 0.001f && i < 10; i++) {
-            dmax = 0;
+    public void adjust(List<Point> list) {
+        float dMax = 100;
+        for (int i = 0; dMax > 0.001f && i < 10; i++) {
+            dMax = 0;
             for (Point p : list) {
                 float d = adjust(p, null);
-                if (d > dmax)
-                    dmax = d;
+                if (d > dMax)
+                    dMax = d;
             }
         }
-        return dmax;
     }
 
     /**
      * Adjust one of Point with list of segments
      */
-    public float adjustSegments(Point p, List<Segment> segs) {
-        float dmax = 100;
-        for (int i = 0; dmax > 0.001f && i < 10; i++) {
-            dmax = 0;
-            float d = adjust(p, segs);
-            if (d > dmax)
-                dmax = d;
+    public void adjustSegments(Point p, List<Segment> segments) {
+        float max = 100;
+        for (int i = 0; max > 0.001f && i < 10; i++) {
+            max = 0;
+            float d = adjust(p, segments);
+            if (d > max)
+                max = d;
         }
-        return dmax;
     }
 
     /**
@@ -359,19 +356,18 @@ public class Model implements Serializable {
         // Take all segments containing point p or given list
         List<Segment> segs = segments == null ? searchSegments(p) : segments;
         float size = segs.size();
-        float dmax = 100;
-        // Kaczmarz
+        float max = 100;
         // Iterate while length difference between 2d and 3d is > 1e-3
-        for (int i = 0; dmax > 0.001f && i < 20; i++) {
-            dmax = 0;
+        for (int i = 0; max > 0.001f && i < 20; i++) {
+            max = 0;
             // Iterate over all segments
             // Pm is the medium point
             Point pm = new Point().setFrom3D(0, 0, 0);
             for (Segment s : segs) {
                 float lg3d = s.lg3d() / currentScale;
                 float d = (s.lg2d - s.lg3d);
-                if (Math.abs(d) > dmax)
-                    dmax = Math.abs(d);
+                if (Math.abs(d) > max)
+                    max = Math.abs(d);
                 // Move B Bnew=A+AB*r With r=l2d/l3d
                 // AB * r is the extension based on length3d to match length2d
                 float r = (s.lg2d / lg3d);
@@ -394,7 +390,7 @@ public class Model implements Serializable {
                 p.z = pm.z / size;
             }
         }
-        return dmax;
+        return max;
     }
 
     /**
@@ -417,7 +413,7 @@ public class Model implements Serializable {
      * Move list of points by dx,dy,dz
      */
     public void move(float dx, float dy, float dz, List<Point> pts) {
-        pts = pts == null ? points : pts.size() == 0 ? points : pts;
+        pts = pts == null ? points : pts.isEmpty() ? points : pts;
         for (Point p : pts) {
             p.x += dx;
             p.y += dy;
@@ -495,7 +491,7 @@ public class Model implements Serializable {
      * Move given or all points to z = 0
      */
     public void flat(List<Point> pts) {
-        List<Point> lp = pts.size() == 0 ? points : pts;
+        List<Point> lp = pts.isEmpty() ? points : pts;
         for (Point p : lp)
             p.z = 0;
     }
@@ -513,7 +509,7 @@ public class Model implements Serializable {
      * Offset all faces either behind zero plane or above zero plane
      */
     public void offsetDecal(float dcl, List<Face> list) {
-        list = list.size() == 0 ? faces : list;
+        list = list.isEmpty() ? faces : list;
         float max = dcl < 0 ? -1000 : 1000;
         float o;
         for (Face f : list) {
@@ -531,7 +527,7 @@ public class Model implements Serializable {
      * Add offset dz to all following faces according to Z
      */
     public void offsetAdd(float dz, List<Face> list) {
-        List<Face> lf = list.size() == 0 ? faces : list;
+        List<Face> lf = list.isEmpty() ? faces : list;
         for (Face f : lf) {
             f.offset += dz * (f.normal[2] >= 0 ? 1 : -1);
         }
@@ -541,7 +537,7 @@ public class Model implements Serializable {
      * Multiply offset by k for all faces or only listed
      */
     public void offsetMul(float k, List<Face> list) {
-        List<Face> lf = list.size() == 0 ? faces : list;
+        List<Face> lf = list.isEmpty() ? faces : list;
         for (Face f : lf) {
             f.offset *= k;
         }
@@ -572,8 +568,8 @@ public class Model implements Serializable {
     private void splitOneFaceByPlane(Face f1, Plane pl) {
         Point i;
         Point p1 = null, p2 = null;
-        List<Point> frontSide = new LinkedList<Point>(); // Front side
-        List<Point> backSide = new LinkedList<Point>(); // Back side
+        List<Point> frontSide = new LinkedList<>(); // Front side
+        List<Point> backSide = new LinkedList<>(); // Back side
 
         // Begin with last point
         Point a = f1.points.get(f1.points.size() - 1);
@@ -853,40 +849,12 @@ public class Model implements Serializable {
      * Search segments containing a
      */
     private List<Segment> searchSegments(Point a) {
-        List<Segment> l = new LinkedList<Segment>();
+        List<Segment> l = new LinkedList<>();
         for (Segment s : segments) {
             if (s.p1 == a || s.p2 == a) // Pointer
                 l.add(s);
         }
         return l;
-    }
-
-    /**
-     * 2D Boundary [xmin, ymin, xmax, ymax]
-     */
-    public float[] get2DBounds() {
-        float xmax = -100.0f, xmin = 100.0f;
-        float ymax = -100.0f, ymin = 100.0f;
-        for (Point p : points) {
-            float x = p.xf, y = p.yf;
-            if (x > xmax) xmax = x;
-            if (x < xmin) xmin = x;
-            if (y > ymax) ymax = y;
-            if (y < ymin) ymin = y;
-        }
-        return new float[]{xmin, ymin, xmax, ymax};
-    }
-
-    /**
-     * Fit the model to -200 +200
-     */
-    public void zoomFit() {
-        float[] b = get3DBounds();
-        float w = 400;
-        float scale = w / Math.max(b[2] - b[0], b[3] - b[1]);
-        float cx = -(b[0] + b[2]) / 2, cy = -(b[1] + b[3]) / 2;
-        move(cx, cy, 0, null);
-        scaleModel(scale);
     }
 
     /**
@@ -928,26 +896,8 @@ public class Model implements Serializable {
             oos.writeObject(this);
             oos.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return bs.toByteArray();
-    }
-
-    // --------------------- DEBUG ------------
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Points[").append(points.size()).append("] : ");
-        for (Point p : points) {
-            sb.append(p).append("\n");
-        }
-        sb.append("Segments[").append(segments.size()).append("] : ");
-        for (Segment s : segments) {
-            sb.append(s).append("\n");
-        }
-        sb.append("Faces[").append(faces.size()).append("] : ");
-        for (Face f : faces) {
-            sb.append(f).append("\n");
-        }
-        return sb.toString();
     }
 }

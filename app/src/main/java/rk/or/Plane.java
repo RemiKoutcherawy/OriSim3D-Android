@@ -39,21 +39,6 @@ public class Plane {
     }
 
     /**
-     * Intersection of This plane with Segment
-     */
-    public Point intersect(Segment s) {
-        // (A+tAB).N=d <=> t=(d-A.N)/(AB.N) then Q=A+tAB 0<t<1
-        Point ab = new Point().setFrom3D(s.p2.x - s.p1.x, s.p2.y - s.p1.y, s.p2.z - s.p1.z);
-        float abn = ab.dot(n);
-        if (abn == 0)
-            return null;
-        float t = (d - s.p1.dot(n)) / abn;
-        if (t >= 0 && t <= 1.0)
-            return ab.scaleThis(t).addToThis(s.p1);
-        return null;
-    }
-
-    /**
      * Intersection of This plane with segment defined by two points
      */
     public Point intersect(Point a, Point b) {
@@ -82,13 +67,4 @@ public class Plane {
             return -1;
         return 0;
     }
-
-    /**
-     * Return Pl normal:n distance:d
-     */
-    @Override
-    public String toString() {
-        return "Pl n:" + n + " d:" + d;
-    }
-
 }
