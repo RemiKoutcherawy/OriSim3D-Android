@@ -14,8 +14,8 @@ android {
     defaultConfig {
         applicationId "rk.or.android"
         minSdkVersion 35
-        targetSdk 35
-        versionCode 8
+        compileSdkVersion 36
+        versionCode 9
         versionName "OriSim3D"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
@@ -36,14 +36,10 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility = '11'
+        targetCompatibility = '11'
     }
     namespace 'rk.or.android'
-    compileSdk 36
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
 }
 
 dependencies {
