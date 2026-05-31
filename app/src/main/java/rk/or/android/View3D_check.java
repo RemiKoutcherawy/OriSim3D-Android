@@ -205,6 +205,7 @@ public class View3D_check extends GLSurfaceView implements GLSurfaceView.Rendere
                 super.performClick();
                 break;
             }
+            default: break;
         }
 
         // Don't forget to redraw

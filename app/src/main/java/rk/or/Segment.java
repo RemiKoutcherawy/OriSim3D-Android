@@ -96,7 +96,7 @@ public class Segment implements Comparable<Segment>, Serializable {
     /**
      * 2D Length in flat view
      */
-    public void lg2d() {
+    public void length2d() {
         lg2d = (float) Math.sqrt((p1.xf - p2.xf) * (p1.xf - p2.xf)
                 + (p1.yf - p2.yf) * (p1.yf - p2.yf));
     }

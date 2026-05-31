@@ -202,6 +202,7 @@ public class View3D extends GLSurfaceView implements GLSurfaceView.Renderer {
                 super.performClick();
                 break;
             }
+            default: break;
         }
 
         // Don't forget to redraw

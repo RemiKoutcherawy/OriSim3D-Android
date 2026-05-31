@@ -245,7 +245,7 @@ public class Model implements Serializable {
         addSegment(p, s.p2, s.type);
         // Shorten s1
         s.p2 = p;
-        s.lg2d();
+        s.length2d();
     }
 
     /**

@@ -24,7 +24,7 @@ public class Commands {
     public Model model;
     public View3D view3d;
     // States
-    public enum State {idle, run, anim, pause, undo}
+    public enum State {IDLE, RUN, ANIM, PAUSE, UNDO}
     public State state;
     // Serialized model to undo
     private final LinkedList<byte[]> undo;
@@ -52,7 +52,7 @@ public class Commands {
     public Commands() {
         undo = new LinkedList<>();
         done = new LinkedList<>();
-        state = State.idle;
+        state = State.IDLE;
     }
 
     /**
@@ -61,7 +61,7 @@ public class Commands {
     public synchronized void command(String cde) {
 
 // -- State Idle tokenize list of command
-        if (state == State.idle) {
+        if (state == State.IDLE) {
             if (cde.equals("u")) {
                 Collections.reverse(done);
                 todo = done.toArray(new String[0]);
@@ -84,41 +84,41 @@ public class Commands {
             }
             // Execute
             todo = tokenize(cde);
-            state = State.run;
+            state = State.RUN;
             iTok = 0;
             commandLoop();
             return;
         }
 // -- State Run execute list of command
-        if (state == State.run) {
+        if (state == State.RUN) {
             commandLoop();
             return;
         }
 // -- State Animation execute up to ')' or pause
-        if (state == State.anim) {
+        if (state == State.ANIM) {
             // "Pause"
             if (cde.equals("pa")) {
-                state = State.pause;
+                state = State.PAUSE;
             }
             return;
         }
 // -- State Paused in animation
-        if (state == State.pause) {
+        if (state == State.PAUSE) {
             // "Continue"
             if (cde.equals("co")) {
                 pauseDuration = System.currentTimeMillis() - pauseStart;
                 // Continue animation
-                state = State.anim;
+                state = State.ANIM;
                 view3d.requestRender();
             } else if (cde.equals("u")) {
                 // Undo one step
-                state = State.undo;
+                state = State.UNDO;
                 undo();
             }
             return;
         }
 // -- State undo
-        if (state == State.undo) {
+        if (state == State.UNDO) {
             if (!undoInProgress) {
                 switch (cde) {
                     case "u":
@@ -127,11 +127,13 @@ public class Commands {
                         break;
                     case "co":
                         // Switch back to run
-                        state = State.run;
+                        state = State.RUN;
                         commandLoop();
                         break;
                     case "pa":
                         // Forbidden ignore pause
+                        break;
+                    default:
                         break;
                 }
             }
@@ -153,7 +155,7 @@ public class Commands {
                 done.addFirst(todo[iTok]);
                 duration = (long) get();
                 pauseDuration = 0;
-                state = State.anim;
+                state = State.ANIM;
                 animStart();
                 // Return breaks the loop, giving control to anim
                 return;
@@ -176,8 +178,8 @@ public class Commands {
             view3d.requestRender();
         }
         // End of command line switch to idle
-        if (state == State.run) {
-            state = State.idle;
+        if (state == State.RUN) {
+            state = State.IDLE;
         }
     }
 
@@ -197,7 +199,7 @@ public class Commands {
      * return true if anim should continue false if anim should end
      */
     public boolean anim() {
-        if (state == State.undo) {
+        if (state == State.UNDO) {
             int index = popUndo();
             boolean ret = index > iTok;
             // Stop undo if undo mark reached and switch to repaint
@@ -206,10 +208,10 @@ public class Commands {
                 view3d.requestRender();
             }
             return ret;
-        } else if (state == State.pause) {
+        } else if (state == State.PAUSE) {
             pauseStart = System.currentTimeMillis();
             return false;
-        } else if (state != State.anim) {
+        } else if (state != State.ANIM) {
             return false;
         }
         long t = System.currentTimeMillis();
@@ -241,10 +243,10 @@ public class Commands {
                 done.addFirst(todo[iBeginAnim++]);
             }
             // Switch back to run and launch next cde
-            state = State.run;
+            state = State.RUN;
             commandLoop();
             // If commandLoop has launched another animation we continue
-            return state == State.anim;
+            return state == State.ANIM;
             // OK we stop anim
         }
         // Rewind to continue animation
@@ -261,7 +263,7 @@ public class Commands {
         }
         // We should be Only in states : idle pause undo
         // Rewind to last 't' or 'd' command from done
-        if (state == State.idle) {
+        if (state == State.IDLE) {
             iTok = todo.length - 1;
         }
         while (iTok >= 0) {
@@ -275,7 +277,7 @@ public class Commands {
         // We have rewound to 't' or 'd', launch the sequence to undo to iTok
         tni = 1;
         tpi = 0;
-        state = State.undo;
+        state = State.UNDO;
         undoInProgress = true;
         // Launch animation to popUndo until iTok reached
         view3d.requestRender();

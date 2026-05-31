@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.ArrowUp).setVisibility(View.VISIBLE);
 
         // Stop current
-        commands.state = Commands.State.idle;
+        commands.state = Commands.State.IDLE;
 
         // Read and start simulation
         String text = readRawText(getApplicationContext(), id);
