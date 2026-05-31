@@ -8,42 +8,42 @@ c 0 4 c 4 1 c 0 6 c 6 3
 c 7 0 c 7 3 c 7 2 c 7 1
 // Replie le coin et retourne
 od -1 il
-t 2000 f 50 180 22 3 13)
+t 1000 f 50 180 22 3 13)
 //end
 t 500 ty 180)
 mo 23 13 mo 7 3 mo 11 22
 od -1
 // Bord haut
-t 2000 f 24 -180 6 20 0)
+t 1000 f 24 -180 6 20 0)
 // oreille haut 
-t 2000 f 49 105 20 0 a 10)
-t 2000 f 35 -180 4 15 1 a 10 0)
-t 2000 f 48 170 10 0 a 20)
+t 1000 f 49 105 20 0 a 10)
+t 1000 f 35 -180 4 15 1 a 10 0)
+t 1000 f 48 170 10 0 a 20)
 o 3 0 6 24 25
 // oreille bas 
-t 2000 f 54 105 15 1 a 21)
-t 2000 f 31 -180 8 24 2 a 21 1)
-t 2000 f 54 170 15 1 a 21)
+t 1000 f 54 105 15 1 a 21)
+t 1000 f 31 -180 8 24 2 a 21 1)
+t 1000 f 54 170 15 1 a 21)
 o 3 12 14 30 31
 // oreille bas gauche
-t 2000 f 52 105 24 2 a 18)
-t 2000 f 44 -180 5 a 2 18) 
-t 2000 f 52 170 24 2 a 18)
+t 1000 f 52 105 24 2 a 18)
+t 1000 f 44 -180 5 a 2 18) 
+t 1000 f 52 170 24 2 a 18)
 o 3 23 15 28 29
 // Ajuste avant de replier
 mo 7 8 4 5 6 mo 11 22 mo 23 13 a 21 18 20 10
 // Replie
 t 500 ty 180)
 od -1
-t 2000 f 20 175 11 22 9 0 20 10 19) // 180-5=175
+t 1000 f 20 175 11 22 9 0 20 10 19) // 180-5=175
 od -3 0 6 25 17 2 26 20 24 8 18 11 9 1 16
 // Redresse la queue 
 t 500 f 54 12 15 1 21) // 10 centre mais apres le bec il faut +2
 // Ouvre le bec  
 t 500 ty 180)
-t 2000 f 51 -75 23 13 17 16 18 24 2) 
-t 2000 r 42 -90 3)
-t 2000 r 51 -100 23 13 17 16 18 24 2 a 3) // reste 10 pour clore 
+t 1000 f 51 -75 23 13 17 16 18 24 2) 
+t 1000 r 42 -90 3)
+t 1000 r 51 -100 23 13 17 16 18 24 2 a 3) // reste 10 pour clore 
 // Ouvre la tête 
 t 500 r 20 -4 22 r 20 4 13 a 3)
 // Ouvre les pattes
