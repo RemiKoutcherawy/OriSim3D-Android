@@ -55,6 +55,9 @@ android {
         sourceCompatibility = '11'
         targetCompatibility = '11'
     }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
     namespace 'rk.or.android'
 }
 

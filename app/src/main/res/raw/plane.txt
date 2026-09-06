@@ -1,0 +1,35 @@
+// Paper airplane by Vibe Mistral
+define 200 200
+textures
+// Center crease
+across2d p0 p1
+// Wing creases while the sheet is still flat
+across2d p4 p1
+across2d p4 p0
+// Fold top corners to the center
+bisector2d s2 s6
+bisector2d s11 s6
+offset -1 f0 f4 f5 f1 f3
+t 1000 r s16 180 p2 p7
+t 1000 r s20 -180 p3 p9
+// Crease the folded flaps along the future wing line
+split s15 0.5
+split s3 0.5
+by3d p10 p14
+by3d p12 p15
+// Fold in half along the center
+offset -2 f1 f3 f6 f7 f9
+t 1000 r s6 170 p0 p8 p13 p12 p3 p9 p15
+t 200 ty -45
+// Open the wings to fly
+t 300 r s9 80 p1 p11
+t 300 r s17 80 p0 p13
+// Stand the fuselage up, wings toward the camera
+t 500 tz 90
+t 500 fit
+// Show
+iao
+t 1000 z 0.5 0 0
+t 1000 fit
+iao
+t 1000 ty 360
