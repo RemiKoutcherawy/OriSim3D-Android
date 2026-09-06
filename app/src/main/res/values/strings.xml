@@ -5,4 +5,10 @@
     <string name="duck">Duck</string>
     <string name="ArrowDown">ArrowDown</string>
     <string name="ArrowUp">ArrowUp</string>
+
+    <string name="app_menu">Choose model</string>
+    <string name="menu_test">Test</string>
+    <string name="menu_plane">Paper airplane</string>
+    <string name="menu_cocotte">Cocotte</string>
+    <string name="menu_reverse_inside_test">Reverse inside fold test</string>
 </resources>

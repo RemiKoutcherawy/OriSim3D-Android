@@ -1,0 +1,8 @@
+// Triangle base
+d 200 200
+by2d p0 p2 by2d p1 p3
+c2d p0 p1 c2d p1 p2
+t 1000 r s5 -180 p8 r s6 180 p7 a p2 p3 p5
+t 1000 fit
+t 1000 r s11 90 p2 r s11 -90 p3 a p5
+check

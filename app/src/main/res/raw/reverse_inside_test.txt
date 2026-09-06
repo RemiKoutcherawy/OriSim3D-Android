@@ -1,0 +1,11 @@
+// Test du Reverse Inside Fold
+define 200 200
+// Créer une base simple avec une pliure centrale
+by2d p0 p2
+split s2 0.50 // Crée p4
+split s1 0.50 // Crée p5
+by2d p4 p5 // Crée p6
+o -1 f0 o -2 f3
+zoom 0.8
+t 1000 r s4 -180 p3 p4 // Replie la face
+t 1000 reverseInside s4 p6

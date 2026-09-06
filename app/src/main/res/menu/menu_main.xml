@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_test"
+        android:title="@string/menu_test" />
+    <item
+        android:id="@+id/menu_plane"
+        android:title="@string/menu_plane" />
+    <item
+        android:id="@+id/menu_cocotte"
+        android:title="@string/menu_cocotte" />
+    <item
+        android:id="@+id/menu_reverse_inside_test"
+        android:title="@string/menu_reverse_inside_test" />
+</menu>

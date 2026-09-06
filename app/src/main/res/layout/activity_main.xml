@@ -1,75 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <rk.or.android.View3D
-        android:id="@+id/view3d"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <ImageButton
-        android:id="@+id/ArrowUp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:contentDescription="@string/ArrowUp"
-        android:src="@android:drawable/arrow_up_float" />
-
-    <LinearLayout
-        android:id="@+id/BottomMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:orientation="vertical">
+        <rk.or.android.View3D
+            android:id="@+id/view3d"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <ImageButton
-            android:id="@+id/ArrowDown"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:src="@android:drawable/arrow_down_float"
-            android:contentDescription="@string/ArrowDown" />
+            android:id="@+id/menuButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="4dp"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/app_menu"
+            android:src="@drawable/ic_menu_hamburger" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:orientation="horizontal"
-            android:visibility="visible">
+    </FrameLayout>
 
-            <ImageView
-                android:id="@+id/Cocotte"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|start"
-                android:contentDescription="@string/cocotte"
-                android:src="@drawable/cocotte72x72" />
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navView"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/menu_main" />
 
-            <ImageView
-                android:id="@+id/Austria"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/austria"
-                android:src="@drawable/austria72x72" />
-
-            <ImageView
-                android:id="@+id/Boat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/boat"
-                android:src="@drawable/boat72x72" />
-
-            <ImageView
-                android:id="@+id/Duck"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/duck"
-                android:src="@drawable/duck72x72" />
-
-        </LinearLayout>
-    </LinearLayout>
-
-</FrameLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

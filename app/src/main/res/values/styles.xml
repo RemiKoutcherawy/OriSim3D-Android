@@ -1,7 +1,10 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme">
+    <!-- Base application theme. MaterialComponents (rather than the old plain platform Theme)
+         is required by NavigationView, which reads Material theme attributes (colorPrimary,
+         colorOnSurface, etc.) when inflated. NoActionBar: the app has no Toolbar/ActionBar,
+         just a full-screen GLSurfaceView with a custom hamburger icon opening the drawer. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <!--<item name="colorPrimary">@color/colorPrimary</item>-->
         <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
